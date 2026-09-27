@@ -1,6 +1,7 @@
 import vinext from "vinext";
 import { liveVoice } from "./lib/live-voice-plugin";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
+import { fileURLToPath } from "node:url";
 import hostingConfig from "./.openai/hosting.json";
 import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import { sites } from "./build/sites-vite-plugin";
@@ -9,6 +10,14 @@ const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   "00000000-0000-4000-8000-000000000000";
 
 const { d1, r2 } = hostingConfig;
+
+// The stand runs inside workerd with D1, so `@/lib/platform` resolves to its Cloudflare variant here; the hosted
+// Next.js build keeps lib/platform.ts (Postgres). vinext has already mapped `@/` to the root when this runs.
+const platform = fileURLToPath(new URL("./lib/platform", import.meta.url));
+function standPlatform(): Plugin {
+  const target = fileURLToPath(new URL("./lib/platform.cloudflare.ts", import.meta.url));
+  return { name: "navi-stand-platform", enforce: "pre", resolveId: id => [platform, `${platform}.ts`, "@/lib/platform"].includes(id) ? target : undefined };
+}
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
@@ -57,6 +66,7 @@ export default defineConfig(async () => {
       ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),
     },
     plugins: [
+      standPlatform(),
       liveVoice(),
       vinext(),
       sites({ mockAuth: !managedLinux }),

@@ -1,3 +1,5 @@
+> **Deploy to Vercel:** see [DEPLOY.md](DEPLOY.md). The hosted site uses Next.js and Postgres; the local stand keeps its own D1 database.
+
 > **Stand transfer (macOS):** Start with [START-HERE.md](START-HERE.md) and double-click `Start Navi.command`. The primary booth uses Sienna and approved scripts; see [NAVI-SCRIPT.md](NAVI-SCRIPT.md). Older voice experiments below are retained as project history.
 
 > Актуальная подача: демонстрация с выбором русского или английского языка для работающих специалистов. Восемь ситуаций → профессиональные роли, рабочие задачи и польза для команды. Без стажировок, первого проекта и оценки квалификации. Основной источник: [CAREER-EXPLORER.md](CAREER-EXPLORER.md); прежние предложения ниже исторические.
