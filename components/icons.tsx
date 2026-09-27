@@ -2,7 +2,7 @@ import { HugeiconsIcon, type HugeiconsProps, type IconSvgElement } from "@hugeic
 import {
   AnalyticsUpIcon, ArrowDown01Icon, ArrowLeft02Icon, ArrowRight02Icon, ArrowUp01Icon, ArrowUpRight01Icon,
   Briefcase01Icon, Bug01Icon, Calendar03Icon, Cancel01Icon, ChartColumnIcon, CheckListIcon, CpuIcon,
-  Cursor01Icon, DashboardSpeed01Icon, DashboardSquare01Icon, Download04Icon, GitBranchIcon, HierarchyIcon,
+  Cursor01Icon, DashboardSpeed01Icon, Globe02Icon, DashboardSquare01Icon, Download04Icon, GitBranchIcon, HierarchyIcon,
   InboxIcon, Logout03Icon, MaximizeScreenIcon, Mic01Icon, MicOff01Icon, MinimizeScreenIcon, PenTool03Icon,
   PlayIcon, Refresh01Icon, RepeatIcon, Search01Icon, SearchFocusIcon, SecurityCheckIcon, SentIcon,
   ShoppingCart01Icon, SlidersHorizontalIcon, SourceCodeIcon, SquareLock02Icon, StopIcon, Table01Icon,
@@ -31,6 +31,7 @@ export const X = icon(Cancel01Icon);
 export const Maximize = icon(MaximizeScreenIcon);
 export const Minimize = icon(MinimizeScreenIcon);
 export const Settings = icon(SlidersHorizontalIcon);
+export const Globe = icon(Globe02Icon);
 export const Play = icon(PlayIcon);
 export const Stop = icon(StopIcon);
 export const Mic = icon(Mic01Icon);

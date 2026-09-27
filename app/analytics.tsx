@@ -1,12 +1,12 @@
 'use client';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, ArrowRight, Refresh, ChevronDown, AnalyticsChart, ListChecks } from "@/components/icons";
+import { ArrowRight, Refresh, ChevronDown, AnalyticsChart, ListChecks } from "@/components/icons";
 import {workContexts} from '@/lib/work-context';
 import {RoleIcon,roleStyle,TaskIcon,JourneySteps} from './career-visuals';
 import {profiles,questions,QUIZ_VERSION,type Stats,type QuizLanguage} from '@/lib/quiz';
 const empty:Stats={started:0,completed:0,leads:0,profiles:[],intents:[],interests:[],hours:[],patterns:[],legacy:{started:0,completed:0},excluded:0,version:QUIZ_VERSION,updatedAt:''};
-export default function Analytics({revision=0,compact=false,language:givenLanguage,onLanguageChange,russianOnly=false}:{expanded?:boolean;russianOnly?:boolean;revision?:number;compact?:boolean;language?:QuizLanguage;onLanguageChange?:(language:QuizLanguage)=>void}){
+export default function Analytics({language:givenLanguage,onLanguageChange,russianOnly=false}:{expanded?:boolean;russianOnly?:boolean;language?:QuizLanguage;onLanguageChange?:(language:QuizLanguage)=>void}){
  const [stats,setStats]=useState(empty),[loaded,setLoaded]=useState(false),[error,setError]=useState(false),[refresh,setRefresh]=useState(0);
  const [localLanguage,setLanguage]=useState<QuizLanguage>('ru'),[view,setView]=useState<'roles'|'choices'>('roles'),[roleId,setRoleId]=useState<string|null>(null),[question,setQuestion]=useState(0);
  const language=givenLanguage||localLanguage,en=language==='en';
@@ -15,13 +15,12 @@ export default function Analytics({revision=0,compact=false,language:givenLangua
   async function update(){if(pending||document.hidden)return;pending=true;try{const response=await fetch('/api/stats',{cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(12000)])});if(!response.ok)throw Error();const data=await response.json() as Stats;if(active){setStats(data);setLoaded(true);setError(false);}}catch(e){if(active&&(e as Error).name!=='AbortError')setError(true);}finally{pending=false;}}
   void update();const interval=setInterval(update,5000);document.addEventListener('visibilitychange',update);
   return()=>{active=false;controller.abort();clearInterval(interval);document.removeEventListener('visibilitychange',update);};
- },[revision,refresh]);
+ },[refresh]);
  const total=stats.completed;
  const distribution=profiles.map(p=>({...p,count:stats.profiles.find(row=>row.profile===p.id)?.count||0})).sort((a,b)=>b.count-a.count);
  const selected=distribution.find(p=>p.id===roleId)||distribution[0],copy=en?selected.en:selected;
  const q=questions[question],counts=stats.patterns.find(p=>p.question===q.id)?.counts||[0,0,0,0];
  const leader=Math.max(...counts),ties=counts.filter(n=>n===leader).length;
- if(compact)return <aside className="prism-ribbon"><Link href="/screen" target="_blank" rel="noreferrer"><AnalyticsChart size={20} aria-hidden="true"/><strong>Prism</strong><span>{en?'Explore the shared picture':'Посмотреть общую картину'}{loaded&&total>0?` · ${total}`:''}</span><ArrowUpRight size={16}/></Link></aside>;
  return <section className="career-prism" aria-label="Prism">
   <div className="cp-top"><div><strong>Prism</strong><span>{en?'Live booth insights':'Живая аналитика стенда'}</span></div>{!russianOnly&&<label className="cp-language"><span className="visually-hidden">Language / Язык</span><select value={language} onChange={e=>{const next=e.target.value==='en'?'en':'ru';setLanguage(next);onLanguageChange?.(next);}}><option value="ru">Русский</option><option value="en">English</option></select></label>}</div>
   <div className="cp-heading"><div><h1>{en?'What work sparks interest?':'Какие задачи вызывают интерес?'}</h1><p>{en?'Eight situations. Real choices. A shared picture.':'Восемь ситуаций. Реальные ответы. Общая картина.'}</p></div><div className="cp-metrics"><div><strong>{loaded?total:'—'}</strong><span>{en?'completed tests':'завершённых тестов'}</span></div><div><strong>{loaded?stats.started:'—'}</strong><span>{en?'tests started':'тестов начато'}</span></div></div></div>

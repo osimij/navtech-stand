@@ -1,18 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent } from "react";
-import { ArrowRight, ArrowLeft, Check, ChevronDown } from "@/components/icons";
+import Link from "next/link";
+import { ArrowRight, ArrowLeft, Check, ChevronDown, Globe } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { questions, scoreAnswers, interestLabels, type QuizLanguage } from "@/lib/quiz";
-import Analytics from "./analytics";
 import CameraInvite, { type CameraHandle } from "./camera";
 import Mascot, { type MascotHandle } from "./mascot";
 import { createSessionSync, type SaveState } from "@/lib/session-sync";
-import { JourneySteps, TaskIcon, TaskPreview } from "./career-visuals";
+import { TaskIcon, TaskPreview } from "./career-visuals";
 import { taskPreviews, englishTaskPreviews } from "@/lib/work-context";
 import CareerResults from "./career-results";
 import { Header  } from "./shell";
@@ -55,7 +55,6 @@ export default function Home() {
   const [advancing, setAdvancing] = useState(false);
   const [error, setError] = useState("");
   const [greeting, setGreeting] = useState("");
-  const [revision, setRevision] = useState(0);
   const [idleLeft, setIdleLeft] = useState(120);
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
@@ -97,7 +96,8 @@ export default function Home() {
     window.addEventListener("pointerdown", touch);
     window.addEventListener("keydown", touch);
     const timer = setInterval(() => {
-      if (phase === "welcome" || busy || advancing || settingsOpen) return;
+      if (busy || advancing || settingsOpen) return;
+      if (phase === "welcome") { if (chosenLanguage && Date.now() - touched.current > 60000) reset(); return; }
       const limit = phase === "success" ? 20 : 120;
       const left = Math.max(0, limit - Math.floor((Date.now() - touched.current) / 1000));
       setIdleLeft(left);
@@ -108,7 +108,7 @@ export default function Home() {
       window.removeEventListener("keydown", touch);
       clearInterval(timer);
     };
-  }, [phase, busy, advancing, settingsOpen, reset]);
+  }, [phase, chosenLanguage, busy, advancing, settingsOpen, reset]);
 
   useEffect(() => {
     const heading = title.current;
@@ -118,8 +118,7 @@ export default function Home() {
       const rect = heading.getBoundingClientRect();
       if (rect.top < 0 || rect.bottom > window.innerHeight) heading.scrollIntoView({ block: "start" });
     }
-
-  }, [phase, step]);
+  }, [phase, step, chosenLanguage]);
 
   useEffect(() => () => {
     generation.current++; sessionSync.current?.dispose();
@@ -129,6 +128,22 @@ export default function Home() {
 
   const result = answers.length === questions.length ? scoreAnswers(answers) : null;
   const mascotMood = error ? "reassuring" : busy ? "thinking" : phase === "result" || phase === "success" ? "celebrate" : advancing ? "acknowledge" : phase === "quiz" ? "thinking" : "neutral";
+
+  function chooseLanguage(next: QuizLanguage) {
+    if (submitLock.current) return;
+    submitLock.current = true; invitations.current?.stop(); setAdvancing(true);
+    const fade = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 200;
+    transitionTimer.current = setTimeout(() => {
+      setLanguage(next); setAdvancing(false); setGreeting("");
+      touched.current = Date.now(); submitLock.current = false;
+    }, fade);
+  }
+
+  function changeLanguage() {
+    if (submitLock.current) return;
+    invitations.current?.stop(); setLanguage(null); setGreeting(""); setError("");
+    touched.current = Date.now();
+  }
 
   function start() {
     if (submitLock.current || !chosenLanguage) return;
@@ -140,7 +155,7 @@ export default function Home() {
     sessionSync.current?.dispose();
     const sync = createSessionSync(current, (method,payload,signal)=>api('/api/sessions',method,payload,signal), state=>{
       if (generation.current !== owner) return;
-      setSaveState(state); if(state==='saved'){setSaveError('');setRevision(x=>x+1);}
+      setSaveState(state); if(state==='saved')setSaveError('');
     });
     sessionSync.current=sync; setSession(current);
     setPhase('quiz'); setIdleLeft(120); touched.current=Date.now();
@@ -195,7 +210,7 @@ export default function Home() {
       await api("/api/leads", "POST", { ...session, name, company, contact, interest, consent });
       if(generation.current!==owner)return;
       setName(""); setCompany(""); setContact(""); setConsent(false);
-      setPhase("success"); setIdleLeft(20); setRevision(x => x + 1);
+      setPhase("success"); setIdleLeft(20);
     } catch (e) { if(generation.current===owner)setError((e as Error).message); }
     finally { if(generation.current===owner){setBusy(false); submitLock.current = false;} }
   }
@@ -207,8 +222,9 @@ export default function Home() {
 
   const gameContext = useMemo(() => ({ phase, step, answers, selected, interest }), [phase, step, answers, selected, interest]);
 
-  return <div className={`app-shell visitor-shell career-shell state-${phase}`}>
-    <Header language={language} actions={<CameraInvite ref={invitations} game={gameContext} russianOnly narration voiceAllowed={Boolean(chosenLanguage)} controlledLanguage={language} onActivity={() => { touched.current = Date.now(); }} idle={phase === "welcome" && !busy} onGreeting={greet} onMotion={point => mascot.current?.notice(point)} onFace={point => mascot.current?.trackFace(point)} onSpeech={frame => mascot.current?.speak(frame)} onOpenChange={setSettingsOpen} />} />
+  return <div className={`app-shell visitor-shell career-shell state-${phase} ${phase === "welcome" ? "is-intro" : ""}`}>
+    <div className="ambient-glow" aria-hidden="true" />
+    <Header language={language} actions={<>{phase === "welcome" && chosenLanguage && <button type="button" className="language-switch" onClick={changeLanguage} aria-label={en ? "Change language" : "Сменить язык"}><Globe size={18} />{en ? "EN" : "RU"}</button>}<CameraInvite ref={invitations} game={gameContext} russianOnly narration voiceAllowed={Boolean(chosenLanguage)} controlledLanguage={language} onActivity={() => { touched.current = Date.now(); }} idle={phase === "welcome" && !busy} onGreeting={greet} onMotion={point => mascot.current?.notice(point)} onFace={point => mascot.current?.trackFace(point)} onSpeech={frame => mascot.current?.speak(frame)} onOpenChange={setSettingsOpen} /></>} />
     <main className={`booth-grid phase-${phase}`}>
       <section className="play-panel" aria-label={en?"Explore with Navi":"Игра с Нави"}>
         {phase !== "welcome" && <div className="panel-top">
@@ -218,16 +234,20 @@ export default function Home() {
 
         {phase !== "welcome" && greeting && <p className="game-caption voice-caption-subordinate" aria-live="polite">{greeting}</p>}
 
-        {phase === "welcome" && <div className="welcome">
-          <div className="welcome-copy">
-            <div className="navi-playground"><Mascot label={en?"Hear a hint from Navi":"Подсказка Нави"} hint={en?"Tap for a hint":"Нажмите для подсказки"} ref={mascot} mood={mascotMood} active={!settingsOpen && !busy} onGreet={() => {if(chosenLanguage)invitations.current?.invite();}} /></div>
-            <div className="welcome-language" role="group" aria-label="Язык / Language"><span>Язык / Language</span><button aria-pressed={chosenLanguage==='ru'} onClick={()=>{invitations.current?.stop();setLanguage('ru');}}>Русский</button><button aria-pressed={chosenLanguage==='en'} onClick={()=>{invitations.current?.stop();setLanguage('en');}}>English</button></div><h1 ref={title} tabIndex={-1}>{en?<>How do you approach<br/>work challenges?</>:<>Как вы решаете<br/>рабочие задачи?</>}</h1>
-            <JourneySteps language={language}/>
-            <Button className="primary-button invitation-button" disabled={!chosenLanguage} onClick={start}>{en?'Start the demonstration':'Начать демонстрацию'}<ArrowRight /></Button>
-            <span className="welcome-time">{en?'2–3 minutes · no right or wrong answers':'2–3 минуты · здесь нет правильных ответов'}</span>
-            {error ? <p className="greeting-line welcome-error" role="alert">{error}</p> : <p className="greeting-line" aria-live="polite">{greeting}</p>}
-          </div>
-
+        {phase === "welcome" && <div className={`intro ${advancing && !chosenLanguage ? "is-leaving" : ""}`}>
+          <div className="intro-navi"><Mascot label={chosenLanguage ? (en ? "Hear a hint from Navi" : "Подсказка Нави") : "Нави · Navi"} hint={chosenLanguage ? (en ? "Tap for a hint" : "Нажмите для подсказки") : ""} ref={mascot} mood={mascotMood} active={!settingsOpen && !busy} onGreet={() => {if(chosenLanguage)invitations.current?.invite();}} /></div>
+          {chosenLanguage ? <div className="intro-step" key="home">
+            <h1 ref={title} tabIndex={-1} className="intro-title">{en?<>How do you approach<br/>work challenges?</>:<>Как вы решаете<br/>рабочие задачи?</>}</h1>
+            <div className="intro-actions"><Button className="primary-button intro-start" onClick={start}>{en?'Start the demonstration':'Начать демонстрацию'}<ArrowRight /></Button></div>
+            <p className="intro-note" role={error ? "alert" : undefined} aria-live="polite">{error || greeting}</p>
+          </div> : <div className="intro-step" key="language">
+            <h1 ref={title} tabIndex={-1} className="intro-title" lang="ru">На каком языке<br/>вы говорите?</h1>
+            <p className="intro-translation" lang="en">What language do you speak?</p>
+            <div className="intro-actions" role="group" aria-label="Язык / Language">
+              <button type="button" className="language-option" lang="ru" disabled={advancing} onClick={() => chooseLanguage("ru")}>Русский</button>
+              <button type="button" className="language-option" lang="en" disabled={advancing} onClick={() => chooseLanguage("en")}>English</button>
+            </div>
+          </div>}
         </div>}
 
         {phase === "quiz" && <div className={`flow-content quiz-content task-tone-${step%4}`}>
@@ -280,6 +300,6 @@ export default function Home() {
         {phase !== "welcome" && phase !== "success" && idleLeft <= 15 && <div className="timeout-notice" role="alert">{en?`New test in ${idleLeft}s`:`Новая игра через ${idleLeft} сек.`}<Button variant="outline" onClick={() => { touched.current = Date.now(); setIdleLeft(120); }}>{en?"I’m still here":"Я ещё здесь"}</Button></div>}
       </section>
     </main>
-    <Analytics revision={revision} compact language={language}/>
+    {(phase !== "welcome" || chosenLanguage) && <nav className="prism-ribbon" aria-label="Prism"><Link href="/screen" target="_blank" rel="noreferrer"><strong>Prism</strong> — {en ? "see the shared picture" : "посмотреть общую картину"}</Link></nav>}
   </div>;
 }
