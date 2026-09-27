@@ -6,7 +6,7 @@ The latest user request is an OpenAI-inspired treatment: gradients, less visual 
 
 [OpenAI's public brand guide](https://openai.com/brand/) describes open space, clear hierarchy, and typography combining precision with warmth. The [ChatGPT overview](https://chatgpt.com/overview/) demonstrates a short proposition followed by an immediate entry action. The public guide does not prescribe a gradient recipe; the specific background here is an interpretation of the user's reference. No OpenAI logos, wordmarks, proprietary fonts, or partnership claims are used.
 
-NavTech source references remain the original mark in `public/brand/navtech-logo.png` and the local Speech Kit product foundations at `/Users/user/Documents/ChatGPT/Speech Kit/app/globals.css`.
+NavTech source references remain the official symbol and wordmark in `components/brand.tsx` and the local Speech Kit product foundations at `/Users/user/Documents/ChatGPT/Speech Kit/app/globals.css`.
 
 ## Composition
 

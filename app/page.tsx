@@ -2,19 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, Check, ChevronDown, Globe } from "@/components/icons";
+import { ArrowRight, ArrowLeft, Check, ChevronDown, Globe, X } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { questions, scoreAnswers, interestLabels, type QuizLanguage } from "@/lib/quiz";
 import CameraInvite, { type CameraHandle } from "./camera";
 import Mascot, { type MascotHandle } from "./mascot";
 import { createSessionSync, type SaveState } from "@/lib/session-sync";
-import { TaskIcon, TaskPreview } from "./career-visuals";
 import { taskPreviews, englishTaskPreviews } from "@/lib/work-context";
 import CareerResults from "./career-results";
+import { TaskIcon } from "./career-visuals";
 import { Header  } from "./shell";
 
 type Phase = "welcome" | "quiz" | "result" | "contact" | "success";
@@ -53,6 +52,7 @@ export default function Home() {
   const generation = useRef(0);
   const [busy, setBusy] = useState(false);
   const [advancing, setAdvancing] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [error, setError] = useState("");
   const [greeting, setGreeting] = useState("");
   const [idleLeft, setIdleLeft] = useState(120);
@@ -62,6 +62,7 @@ export default function Home() {
   const [interest, setInterest] = useState("");
   const [consent, setConsent] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [shownRole, setShownRole] = useState<string | null>(null);
   const touched = useRef(0);
   const title = useRef<HTMLHeadingElement>(null);
   const submitLock = useRef(false);
@@ -82,9 +83,9 @@ export default function Home() {
     if (transitionTimer.current) clearTimeout(transitionTimer.current);
     setSaveState('idle'); setSaveError('');
     setPhase("welcome"); setLanguage(null); setEditing(false); setAnswers([]); setStep(0); setSelected(null);
-    setSession(null); setBusy(false); setAdvancing(false); setError("");
+    setSession(null); setBusy(false); setAdvancing(false); setLeaving(false); setError("");
     setName(""); setCompany(""); setContact(""); setInterest(""); setConsent(false);
-    setGreeting("");
+    setGreeting(""); setShownRole(null);
     if (greetingTimer.current) clearTimeout(greetingTimer.current);
     touched.current = Date.now(); setIdleLeft(120);
     submitLock.current = false;
@@ -179,23 +180,28 @@ export default function Home() {
     nextAnswers[step] = value;
     setAnswers(nextAnswers);
 
-    if (!editing && step < questions.length - 1) {
-      setAdvancing(true);
+    const finished = editing || step === questions.length - 1;
+    setAdvancing(true);
+    // The choice stays visible for a moment, then the question fades and the next screen rises in.
+    // A double tap cannot answer two questions: the lock holds until the new options have appeared.
+    transitionTimer.current = setTimeout(() => {
+      setLeaving(true);
       transitionTimer.current = setTimeout(() => {
+        setLeaving(false);
+        if (finished) {
+          // The payoff is local and immediate. Neither saving nor AI speech can gate this screen.
+          setPhase('result'); setEditing(false); setGreeting(''); setIdleLeft(120);
+          setAdvancing(false); submitLock.current = false;
+          void persistResult(nextAnswers);
+          return;
+        }
         setStep(step + 1);
         setSelected(nextAnswers[step + 1] ?? null);
-        // Keep the new answer buttons disabled briefly so a double tap cannot answer two questions.
         transitionTimer.current = setTimeout(() => {
           setAdvancing(false); submitLock.current = false;
         }, 220);
-      }, 180);
-      return;
-    }
-
-    // The payoff is local and immediate. Neither saving nor AI speech can gate this screen.
-    setPhase('result'); setEditing(false); setGreeting(''); setIdleLeft(120);
-    submitLock.current=false;
-    void persistResult(nextAnswers);
+      }, 150);
+    }, 200);
   }
 
   async function save(event: FormEvent) {
@@ -222,17 +228,26 @@ export default function Home() {
 
   const gameContext = useMemo(() => ({ phase, step, answers, selected, interest }), [phase, step, answers, selected, interest]);
 
+  const questionBar = (
+    <div className="question-bar" role="group" aria-label={en ? "Test progress" : "Ход теста"}>
+      <button type="button" className="question-nav" hidden={!editing && step === 0} disabled={busy || advancing} onClick={() => editing ? (setEditing(false), setPhase('result')) : back()} aria-label={editing ? (en ? 'Back to results' : 'К результату') : (en ? 'Back' : 'Назад')}><ArrowLeft size={18} /><span className="question-nav-label">{editing ? (en ? 'Results' : 'К результату') : (en ? 'Back' : 'Назад')}</span></button>
+      <div className="question-progress" role="progressbar" aria-label={en ? 'Situation' : 'Ситуация'} aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-valuetext={`${step + 1} / ${questions.length}`}>
+        {questions.map((_, index) => <span key={index} className={index < step ? 'is-done' : index === step ? 'is-current' : ''} />)}
+      </div>
+    </div>
+  );
+
   return <div className={`app-shell visitor-shell career-shell state-${phase} ${phase === "welcome" ? "is-intro" : ""}`}>
-    <div className="ambient-glow" aria-hidden="true" />
-    <Header language={language} actions={<>{phase === "welcome" && chosenLanguage && <button type="button" className="language-switch" onClick={changeLanguage} aria-label={en ? "Change language" : "Сменить язык"}><Globe size={18} />{en ? "EN" : "RU"}</button>}<CameraInvite ref={invitations} game={gameContext} russianOnly narration voiceAllowed={Boolean(chosenLanguage)} controlledLanguage={language} onActivity={() => { touched.current = Date.now(); }} idle={phase === "welcome" && !busy} onGreeting={greet} onMotion={point => mascot.current?.notice(point)} onFace={point => mascot.current?.trackFace(point)} onSpeech={frame => mascot.current?.speak(frame)} onOpenChange={setSettingsOpen} /></>} />
+    <div className="ambient-glow" data-role={phase === "result" ? shownRole ?? undefined : undefined} aria-hidden="true" />
+    <Header language={language} center={phase === "quiz" ? questionBar : undefined} actions={<>{(phase === "quiz" || phase === "result") && <button type="button" className="question-nav question-end" disabled={busy || advancing} onClick={reset} aria-label={en ? "End test" : "Завершить"}><X size={18} className="question-end-icon" /><span className="question-nav-label">{en ? "End test" : "Завершить"}</span></button>}{phase === "welcome" && chosenLanguage && <button type="button" className="language-switch" onClick={changeLanguage} aria-label={en ? "Change language" : "Сменить язык"}><Globe size={18} />{en ? "EN" : "RU"}</button>}<CameraInvite ref={invitations} game={gameContext} russianOnly narration voiceAllowed={Boolean(chosenLanguage)} controlledLanguage={language} onActivity={() => { touched.current = Date.now(); }} idle={phase === "welcome" && !busy} onGreeting={greet} onMotion={point => mascot.current?.notice(point)} onFace={point => mascot.current?.trackFace(point)} onSpeech={frame => mascot.current?.speak(frame)} onOpenChange={setSettingsOpen} /></>} />
     <main className={`booth-grid phase-${phase}`}>
       <section className="play-panel" aria-label={en?"Explore with Navi":"Игра с Нави"}>
-        {phase !== "welcome" && <div className="panel-top">
+        {(phase === "contact" || phase === "success") && <div className="panel-top">
           <div className="panel-companion"><Mascot label={en?"Hear a hint from Navi":"Подсказка Нави"} hint={en?"Tap for a hint":"Нажмите для подсказки"} ref={mascot} compact mood={mascotMood} active={!settingsOpen} onGreet={() => {if(chosenLanguage)invitations.current?.invite();}} /><span className="panel-product">{en?"Navi":"Нави"} <span>· NavTech</span></span></div>
           <Button variant="ghost" className="reset-button" disabled={busy || advancing} onClick={reset}>{en?'End test':'Завершить'}</Button>
         </div>}
 
-        {phase !== "welcome" && greeting && <p className="game-caption voice-caption-subordinate" aria-live="polite">{greeting}</p>}
+        {(phase === "contact" || phase === "success") && greeting && <p className="game-caption voice-caption-subordinate" aria-live="polite">{greeting}</p>}
 
         {phase === "welcome" && <div className={`intro ${advancing && !chosenLanguage ? "is-leaving" : ""}`}>
           <div className="intro-navi"><Mascot label={chosenLanguage ? (en ? "Hear a hint from Navi" : "Подсказка Нави") : "Нави · Navi"} hint={chosenLanguage ? (en ? "Tap for a hint" : "Нажмите для подсказки") : ""} ref={mascot} mood={mascotMood} active={!settingsOpen && !busy} onGreet={() => {if(chosenLanguage)invitations.current?.invite();}} /></div>
@@ -250,28 +265,32 @@ export default function Home() {
           </div>}
         </div>}
 
-        {phase === "quiz" && <div className={`flow-content quiz-content task-tone-${step%4}`}>
-          <div className="quiz-progress"><span>{en?'Situation':'Ситуация'} {step + 1} / {questions.length}</span><span>{en?'Choose the approach closest to yours':'Выберите близкий вам подход'}</span></div>
-          <Progress value={(step + 1) / questions.length * 100} aria-label={`${step+1} / ${questions.length}`} className="quiz-progress-bar" />
-          <h1 ref={title} tabIndex={-1} className="flow-title">{en?questions[step].en:questions[step].title}</h1>
-
-          <div className="answer-list" key={step}>
-            {questions[step].options.map((option, index) => <Button
-              key={index}
-              variant="ghost"
-              className={`answer-button ${selected === index ? "selected" : ""}`}
-              disabled={busy || advancing}
-              onClick={event => answer(index,event)}
-            ><span className="task-option-icon"><TaskIcon question={step} option={index}/></span><span className="task-option-content"><strong>{(en?englishTaskPreviews:taskPreviews)[step][index].title}</strong><TaskPreview question={step} option={index} language={language}/><span className="task-option-text">{en?option.en:option.text}</span></span>{selected === index && <Check />}</Button>)}
+        {phase === "quiz" && <div className={`question ${leaving ? "is-leaving" : ""}`}>
+          <div className="question-navi">
+            <Mascot label={en?"Hear a hint from Navi":"Подсказка Нави"} hint={en?"Tap for a hint":"Нажмите для подсказки"} ref={mascot} compact mood={mascotMood} active={!settingsOpen} onGreet={() => invitations.current?.invite()} />
+            <p className="navi-caption" aria-live="polite">{greeting}</p>
           </div>
-          <div className="question-footer">
-            <Button variant="ghost" className="back-button" disabled={busy || advancing || (!editing&&step === 0)} onClick={()=>editing?(setEditing(false),setPhase('result')):back()}><ArrowLeft />{editing?(en?'Back to results':'К результату'):(en?'Back':'Назад')}</Button>
-            <span role="status">{busy ? (en?"Preparing your result…":"Собираем результат…") : ""}</span>
+          <div className="question-step" key={step}>
+            <h1 ref={title} tabIndex={-1} className="question-title">{en ? questions[step].en : questions[step].title}</h1>
+            <div className="question-options">
+              {questions[step].options.map((option, index) => <button
+                key={index}
+                type="button"
+                className="question-option"
+                aria-pressed={selected === index}
+                disabled={busy || advancing}
+                onClick={event => answer(index, event)}
+              ><span className="question-option-icon"><TaskIcon question={step} option={index} /></span><span className="question-option-text"><strong>{(en ? englishTaskPreviews : taskPreviews)[step][index].title}</strong>{en ? option.en : option.text}</span>{selected === index && <Check size={20} />}</button>)}
+            </div>
           </div>
         </div>}
 
-        {phase === "result" && result && <div className="flow-content result-content">
-          <CareerResults key={answers.join(',')} answers={answers} language={language} onEdit={index=>{setEditing(true);setStep(index);setSelected(answers[index]);setPhase('quiz');}} onContact={()=>{setInterest('both');setPhase('contact');}} onReset={reset}/>
+        {phase === "result" && result && <div className="result-content">
+          <CareerResults key={answers.join(',')} answers={answers} language={language} onRole={setShownRole} onEdit={index=>{setEditing(true);setStep(index);setSelected(answers[index]);setPhase('quiz');}}/>
+          <div className="result-navi">
+            <Mascot label={en?"Hear a hint from Navi":"Подсказка Нави"} hint={en?"Tap for a hint":"Нажмите для подсказки"} ref={mascot} compact mood={mascotMood} active={!settingsOpen} onGreet={() => invitations.current?.invite()} />
+            <p className="navi-caption" aria-live="polite">{greeting}</p>
+          </div>
           {(saveState==='error'||saveError)&&<div className="result-save-notice" role="status"><span>{en?'Your result is ready. The booth statistics have not been updated yet.':'Результат готов. Пока не удалось добавить его в аналитику стенда.'}</span><Button variant="ghost" onClick={()=>void persistResult(answers)} disabled={saveState==='saving'}>{en?'Retry saving':'Повторить сохранение'}</Button></div>}
         </div>}
 
@@ -300,6 +319,6 @@ export default function Home() {
         {phase !== "welcome" && phase !== "success" && idleLeft <= 15 && <div className="timeout-notice" role="alert">{en?`New test in ${idleLeft}s`:`Новая игра через ${idleLeft} сек.`}<Button variant="outline" onClick={() => { touched.current = Date.now(); setIdleLeft(120); }}>{en?"I’m still here":"Я ещё здесь"}</Button></div>}
       </section>
     </main>
-    {(phase !== "welcome" || chosenLanguage) && <nav className="prism-ribbon" aria-label="Prism"><Link href="/screen" target="_blank" rel="noreferrer"><strong>Prism</strong> — {en ? "see the shared picture" : "посмотреть общую картину"}</Link></nav>}
+    {(phase !== "welcome" || chosenLanguage) && phase !== "quiz" && <nav className="prism-ribbon" aria-label="Prism"><Link href="/screen" target="_blank" rel="noreferrer"><strong>Prism</strong> — {en ? "see the shared picture" : "посмотреть общую картину"}</Link>{phase === "result" && <button type="button" onClick={() => { setInterest("both"); setPhase("contact"); }}>{en ? "Talk to the NavTech team" : "Обсудить продукты NavTech"}</button>}</nav>}
   </div>;
 }

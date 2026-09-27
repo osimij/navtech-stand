@@ -5,8 +5,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { QuizLanguage } from "@/lib/quiz";
 import { Button } from "@/components/ui/button";
+import { NavTechLogo } from "@/components/brand";
 
-export function Header({ actions, language = "ru" }: { actions?: ReactNode; language?: QuizLanguage }) {
+export function Header({ actions, center, language = "ru" }: { actions?: ReactNode; center?: ReactNode; language?: QuizLanguage }) {
   const en = language === "en";
   const [full, setFull] = useState(false);
   const [error, setError] = useState(false);
@@ -26,9 +27,9 @@ export function Header({ actions, language = "ru" }: { actions?: ReactNode; lang
 
   return <header className="masthead">
     <Link href="/" className="brand-lockup" aria-label={en ? "NavTech — home" : "NavTech — на главный экран"}>
-      <img src="/brand/navtech-logo.png" width="48" height="28" alt="NavTech" />
-      <span className="brand-name">NavTech</span>
+      <NavTechLogo />
     </Link>
+    {center && <div className="masthead-center">{center}</div>}
     <div className="header-actions">
       <div className="event-tag">Taj-Tech 2026</div>
       {actions}

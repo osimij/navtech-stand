@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { NavTechLogo } from '@/components/brand';
 import { ArrowRight, Download, RotateCcw, Check, ChevronDown, Mic, Square, Volume2 } from 'lucide-react';
 import Mascot, { type MascotHandle } from '../mascot';
 import { demoCopy, demoQueue, caseStage, choices, stages, focalId, sampleBrief, type Availability, type DemoLanguage, type DemoOrigin } from '@/lib/hiring-demo';
@@ -138,7 +138,7 @@ export default function HiringDemo() {
 
   return <div className="hiring-demo" lang={language}>
     <header className="demo-header">
-      <Link href="/" prefetch={false} className="brand-lockup" aria-label="NavTech"><Image src="/brand/navtech-logo.png" width={48} height={28} alt="" unoptimized/><span className="brand-name">NavTech</span></Link>
+      <Link href="/" prefetch={false} className="brand-lockup" aria-label="NavTech"><NavTechLogo/></Link>
       <div className="demo-header-tools"><DemoCamera ref={camera} language={language} paused={handoff} allowArrival={phase==='intro'&&!voice.busy} onFace={point=>mascot.current?.trackFace(point)} onArrival={()=>mascot.current?.notice({x:0,y:0})}/><span className="demo-sample"><span/>{c.sample}</span>
         <label className="demo-language"><span className="sr-only">{c.language}</span><select value={language} disabled={phase!=='intro'||voice.busy} onChange={event=>{reset();setLanguage(event.target.value === 'en' ? 'en' : 'ru');}}><option value="ru">Русский</option><option value="en">English</option></select></label>
         <button className={`demo-voice-button ${voice.busy?'is-active':''}`} onClick={toggleVoice} disabled={voice.phase==='closing'} aria-label={voice.busy?v.stop:v.start} aria-pressed={voice.busy}>{voice.busy?<Square size={15}/>:<Mic size={17}/>}<span>{voice.phase==='connecting'?v.connecting:voice.phase==='closing'?v.closing:voice.busy?v.stop:v.start}</span></button>

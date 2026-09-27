@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useRef,useState} from 'react';
-import Image from 'next/image';
+import { NavTechLogo } from '@/components/brand';
 import Link from 'next/link';
 import {ArrowRight,Hand,Pause,Play,RotateCcw,SlidersHorizontal} from 'lucide-react';
 import Mascot from '../mascot';
@@ -21,7 +21,7 @@ export default function Stage(){
   return()=>{loop.current=null;release();player.dispose();};
  },[]);
  return <div className={`stage-page ${controls?'stage-controls-open':''} ${still?'stage-still':''}`} lang={language}>
-  <header className="stage-header"><div className="stage-brand"><Image src="/brand/navtech-logo.png" width={70} height={40} alt="" unoptimized/><span>NavTech</span></div><span className="stage-sample">{c.sample}</span></header>
+  <header className="stage-header"><div className="stage-brand"><NavTechLogo/><span className="visually-hidden">NavTech</span></div><span className="stage-sample">{c.sample}</span></header>
   <main className={`stage-scene stage-beat-${beat}`} aria-label={c.beats[beat]}>
    <div className="stage-copy" key={`${beat}-${language}`}>
     <p className="stage-product">{beat===0?'HR-Agent × Prism':beat===1?'HR-Agent':beat===2?'Prism':'HR-Agent × Prism'}</p>
