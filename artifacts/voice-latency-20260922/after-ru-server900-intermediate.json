@@ -1,0 +1,761 @@
+[
+  {
+    "event": "explicit.start",
+    "ms": 0,
+    "test": "cold",
+    "kind": "hiring",
+    "wallClock": "2026-09-22T04:14:16.626Z"
+  },
+  {
+    "event": "state",
+    "ms": 1.7,
+    "test": "cold",
+    "phase": "connecting"
+  },
+  {
+    "event": "transport.pcm",
+    "ms": 1.7,
+    "test": "cold"
+  },
+  {
+    "event": "synthetic.microphone",
+    "ms": 32.7,
+    "test": "cold"
+  },
+  {
+    "event": "microphone.ready",
+    "ms": 32.8,
+    "test": "cold"
+  },
+  {
+    "event": "channel.open",
+    "ms": 2782.8,
+    "test": "cold"
+  },
+  {
+    "event": "session.started",
+    "ms": 4225.3,
+    "test": "cold",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "state",
+    "ms": 4225.7,
+    "test": "cold",
+    "phase": "ready"
+  },
+  {
+    "event": "session.started",
+    "ms": 4225.9,
+    "test": "cold"
+  },
+  {
+    "event": "response.requested",
+    "ms": 4228.3,
+    "test": "cold",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "response.requested",
+    "ms": 4228.5,
+    "test": "cold"
+  },
+  {
+    "event": "response.started",
+    "ms": 4484.1,
+    "test": "cold",
+    "revision": 0
+  },
+  {
+    "event": "response.started",
+    "ms": 4484.3,
+    "test": "cold"
+  },
+  {
+    "event": "first.packet",
+    "ms": 5216.5,
+    "test": "cold"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 732,
+    "test": "cold"
+  },
+  {
+    "event": "audio.pcm_received",
+    "ms": 5219.2,
+    "test": "cold",
+    "bytes": 19200
+  },
+  {
+    "event": "playback",
+    "ms": 5225.3,
+    "test": "cold",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 797,
+    "test": "cold"
+  },
+  {
+    "event": "audio.signal",
+    "ms": 5281.7,
+    "test": "cold",
+    "level": 0.05854707705527316
+  },
+  {
+    "event": "first.played",
+    "ms": 5281.7,
+    "test": "cold",
+    "level": 0.4098295393869121,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 5403.4,
+    "test": "cold",
+    "status": "completed",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "playback",
+    "ms": 7719.6,
+    "test": "cold",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 7720.2,
+    "test": "cold",
+    "caption": "Привет! Что разберём в этом примере?"
+  },
+  {
+    "event": "input.start",
+    "ms": 7721.3,
+    "test": "spoken_1",
+    "duration": 6.49
+  },
+  {
+    "event": "microphone.signal",
+    "ms": 7788.5,
+    "test": "spoken_1",
+    "level": 0.06754150295002118
+  },
+  {
+    "event": "audio.clear",
+    "ms": 8134.8,
+    "test": "spoken_1",
+    "reason": "speech",
+    "lastInputSignalMs": 8108.300000190735
+  },
+  {
+    "event": "input.speech_started",
+    "ms": 8141.2,
+    "test": "spoken_1",
+    "lastInputSignalMs": 8108.300000190735
+  },
+  {
+    "event": "input.speech_started",
+    "ms": 8141.4,
+    "test": "spoken_1"
+  },
+  {
+    "event": "truncate",
+    "ms": 8141.6,
+    "test": "spoken_1",
+    "playedMs": 2500
+  },
+  {
+    "event": "input.file_ended",
+    "ms": 14209.7,
+    "test": "spoken_1",
+    "lastInputSignalMs": 13815
+  },
+  {
+    "event": "input.speech_stopped",
+    "ms": 15343.9,
+    "test": "spoken_1",
+    "lastInputSignalMs": 13815
+  },
+  {
+    "event": "input.speech_stopped",
+    "ms": 15344.5,
+    "test": "spoken_1"
+  },
+  {
+    "event": "response.started",
+    "ms": 15350.7,
+    "test": "spoken_1",
+    "revision": 0
+  },
+  {
+    "event": "response.started",
+    "ms": 15351,
+    "test": "spoken_1"
+  },
+  {
+    "event": "first.packet",
+    "ms": 16298.3,
+    "test": "spoken_1"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 947,
+    "test": "spoken_1"
+  },
+  {
+    "event": "playback",
+    "ms": 16306.8,
+    "test": "spoken_1",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 1344,
+    "test": "spoken_1"
+  },
+  {
+    "event": "first.played",
+    "ms": 16695.4,
+    "test": "spoken_1",
+    "level": 0.0813155643889407,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 16744.6,
+    "test": "spoken_1",
+    "status": "completed",
+    "lastInputSignalMs": 13815
+  },
+  {
+    "event": "playback",
+    "ms": 20300.3,
+    "test": "spoken_1",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 20300.7,
+    "test": "spoken_1",
+    "caption": "Три отклика ждут уточнения доступности для интервью."
+  },
+  {
+    "event": "demo.context",
+    "ms": 20301,
+    "test": "spoken_1",
+    "phase": "result"
+  },
+  {
+    "event": "input.start",
+    "ms": 20301.1,
+    "test": "spoken_2",
+    "duration": 6.49
+  },
+  {
+    "event": "audio.clear",
+    "ms": 20307.8,
+    "test": "spoken_2",
+    "reason": "demo_change",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "truncate",
+    "ms": 20309.9,
+    "test": "spoken_2",
+    "playedMs": 4000
+  },
+  {
+    "event": "response.requested",
+    "ms": 20652.9,
+    "test": "spoken_2",
+    "lastInputSignalMs": 20641.60000014305
+  },
+  {
+    "event": "response.requested",
+    "ms": 20653.2,
+    "test": "spoken_2"
+  },
+  {
+    "event": "audio.clear",
+    "ms": 20719.5,
+    "test": "spoken_2",
+    "reason": "speech",
+    "lastInputSignalMs": 20695.200000047684
+  },
+  {
+    "event": "input.speech_started",
+    "ms": 20721.4,
+    "test": "spoken_2",
+    "lastInputSignalMs": 20695.200000047684
+  },
+  {
+    "event": "input.speech_started",
+    "ms": 20721.6,
+    "test": "spoken_2"
+  },
+  {
+    "event": "truncate",
+    "ms": 20721.7,
+    "test": "spoken_2",
+    "playedMs": 4000
+  },
+  {
+    "event": "response.started",
+    "ms": 20992.5,
+    "test": "spoken_2",
+    "revision": 1
+  },
+  {
+    "event": "response.started",
+    "ms": 20993,
+    "test": "spoken_2"
+  },
+  {
+    "event": "first.packet",
+    "ms": 22139.8,
+    "test": "spoken_2"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 1147,
+    "test": "spoken_2"
+  },
+  {
+    "event": "playback",
+    "ms": 22143.8,
+    "test": "spoken_2",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 1195,
+    "test": "spoken_2"
+  },
+  {
+    "event": "first.played",
+    "ms": 22188.4,
+    "test": "spoken_2",
+    "level": 0.15510369898725485,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 22640.1,
+    "test": "spoken_2",
+    "status": "completed",
+    "lastInputSignalMs": 22617.300000190735
+  },
+  {
+    "event": "playback",
+    "ms": 26444.3,
+    "test": "spoken_2",
+    "busy": false
+  },
+  {
+    "event": "input.file_ended",
+    "ms": 26790.9,
+    "test": "spoken_2",
+    "lastInputSignalMs": 26401.700000047684
+  },
+  {
+    "event": "input.speech_stopped",
+    "ms": 27799.2,
+    "test": "spoken_2",
+    "lastInputSignalMs": 26401.700000047684
+  },
+  {
+    "event": "input.speech_stopped",
+    "ms": 27799.6,
+    "test": "spoken_2"
+  },
+  {
+    "event": "response.started",
+    "ms": 27805.3,
+    "test": "spoken_2",
+    "revision": 1
+  },
+  {
+    "event": "response.started",
+    "ms": 27805.6,
+    "test": "spoken_2"
+  },
+  {
+    "event": "first.packet",
+    "ms": 28875.4,
+    "test": "spoken_2"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 1070,
+    "test": "spoken_2"
+  },
+  {
+    "event": "playback",
+    "ms": 28887.9,
+    "test": "spoken_2",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 1156,
+    "test": "spoken_2"
+  },
+  {
+    "event": "first.played",
+    "ms": 28961.7,
+    "test": "spoken_2",
+    "level": 0.4269504105696723,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 30170.4,
+    "test": "spoken_2",
+    "status": "completed",
+    "lastInputSignalMs": 26401.700000047684
+  },
+  {
+    "event": "playback",
+    "ms": 32876.5,
+    "test": "spoken_2",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 32876.8,
+    "test": "spoken_2",
+    "caption": "Два отклика ждут уточнения доступности для интервью."
+  },
+  {
+    "event": "help.tap",
+    "ms": 32876.9,
+    "test": "help"
+  },
+  {
+    "event": "response.requested",
+    "ms": 32881.7,
+    "test": "help",
+    "lastInputSignalMs": 26401.700000047684
+  },
+  {
+    "event": "response.requested",
+    "ms": 32881.9,
+    "test": "help"
+  },
+  {
+    "event": "response.started",
+    "ms": 33170.9,
+    "test": "help",
+    "revision": 1
+  },
+  {
+    "event": "response.started",
+    "ms": 33171.3,
+    "test": "help"
+  },
+  {
+    "event": "first.packet",
+    "ms": 33973.6,
+    "test": "help"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 803,
+    "test": "help"
+  },
+  {
+    "event": "playback",
+    "ms": 33981.6,
+    "test": "help",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 857,
+    "test": "help"
+  },
+  {
+    "event": "first.played",
+    "ms": 34028.5,
+    "test": "help",
+    "level": 0.22467276571751996,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.025
+  },
+  {
+    "event": "input.start",
+    "ms": 34234.3,
+    "test": "spoken_1",
+    "duration": 6.49
+  },
+  {
+    "event": "barge.start",
+    "ms": 34234.8,
+    "test": "barge"
+  },
+  {
+    "event": "audio.clear",
+    "ms": 34602.9,
+    "test": "barge",
+    "reason": "speech",
+    "lastInputSignalMs": 34562
+  },
+  {
+    "event": "audio.interrupted",
+    "ms": 34603.2,
+    "test": "barge",
+    "code": "speech"
+  },
+  {
+    "event": "input.speech_started",
+    "ms": 34610.4,
+    "test": "barge",
+    "lastInputSignalMs": 34562
+  },
+  {
+    "event": "input.speech_started",
+    "ms": 34610.8,
+    "test": "barge"
+  },
+  {
+    "event": "truncate",
+    "ms": 34611,
+    "test": "barge",
+    "playedMs": 624
+  },
+  {
+    "event": "playback",
+    "ms": 34612.6,
+    "test": "barge",
+    "busy": false
+  },
+  {
+    "event": "response.done",
+    "ms": 34638.9,
+    "test": "barge",
+    "status": "cancelled",
+    "lastInputSignalMs": 34615
+  },
+  {
+    "event": "input.file_ended",
+    "ms": 40721.5,
+    "test": "barge",
+    "lastInputSignalMs": 40321.60000014305
+  },
+  {
+    "event": "input.speech_stopped",
+    "ms": 41701.1,
+    "test": "barge",
+    "lastInputSignalMs": 40321.60000014305
+  },
+  {
+    "event": "input.speech_stopped",
+    "ms": 41701.6,
+    "test": "barge"
+  },
+  {
+    "event": "response.started",
+    "ms": 41710.3,
+    "test": "barge",
+    "revision": 1
+  },
+  {
+    "event": "response.started",
+    "ms": 41710.7,
+    "test": "barge"
+  },
+  {
+    "event": "first.packet",
+    "ms": 42561.4,
+    "test": "barge"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 851,
+    "test": "barge"
+  },
+  {
+    "event": "playback",
+    "ms": 42577.6,
+    "test": "barge",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 904,
+    "test": "barge"
+  },
+  {
+    "event": "first.played",
+    "ms": 42615.2,
+    "test": "barge",
+    "level": 0.08929070637192994,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "context.change",
+    "ms": 42818.1,
+    "test": "context"
+  },
+  {
+    "event": "audio.interrupted",
+    "ms": 42818.5,
+    "test": "context",
+    "code": "demo_change"
+  },
+  {
+    "event": "demo.context",
+    "ms": 42818.8,
+    "test": "context",
+    "phase": "result"
+  },
+  {
+    "event": "playback",
+    "ms": 42819.1,
+    "test": "context",
+    "busy": false
+  },
+  {
+    "event": "audio.clear",
+    "ms": 42820.6,
+    "test": "context",
+    "reason": "demo_change",
+    "lastInputSignalMs": 40321.60000014305
+  },
+  {
+    "event": "truncate",
+    "ms": 42827.5,
+    "test": "context",
+    "playedMs": 256
+  },
+  {
+    "event": "response.done",
+    "ms": 43115.2,
+    "test": "context",
+    "status": "cancelled",
+    "lastInputSignalMs": 40321.60000014305
+  },
+  {
+    "event": "response.requested",
+    "ms": 43465.1,
+    "test": "context",
+    "lastInputSignalMs": 40321.60000014305
+  },
+  {
+    "event": "response.requested",
+    "ms": 43465.3,
+    "test": "context"
+  },
+  {
+    "event": "response.started",
+    "ms": 43787,
+    "test": "context",
+    "revision": 2
+  },
+  {
+    "event": "response.started",
+    "ms": 43787.2,
+    "test": "context"
+  },
+  {
+    "event": "first.packet",
+    "ms": 44316.1,
+    "test": "context"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 530,
+    "test": "context"
+  },
+  {
+    "event": "playback",
+    "ms": 44331.8,
+    "test": "context",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 588,
+    "test": "context"
+  },
+  {
+    "event": "first.played",
+    "ms": 44375.2,
+    "test": "context",
+    "level": 0.3320880188998315,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 44859.2,
+    "test": "context",
+    "status": "completed",
+    "lastInputSignalMs": 40321.60000014305
+  },
+  {
+    "event": "playback",
+    "ms": 48119.3,
+    "test": "context",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 48120.3,
+    "test": "context",
+    "caption": "Два отклика ждут уточнения доступности для интервью."
+  },
+  {
+    "event": "stop",
+    "ms": 48120.9,
+    "test": "context",
+    "code": "manual"
+  },
+  {
+    "event": "state",
+    "ms": 48121.6,
+    "test": "context",
+    "phase": "closing"
+  },
+  {
+    "event": "stop.requested",
+    "ms": 48122,
+    "test": "context"
+  },
+  {
+    "event": "rehearsal.complete",
+    "ms": 48122.1,
+    "test": "context"
+  },
+  {
+    "event": "session.closed",
+    "ms": 48132.4,
+    "test": "context",
+    "lastInputSignalMs": 40321.60000014305
+  },
+  {
+    "event": "state",
+    "ms": 48133.8,
+    "test": "context",
+    "phase": "idle"
+  },
+  {
+    "event": "socket.closed",
+    "ms": 48135.9,
+    "test": "context"
+  }
+]

@@ -1,0 +1,282 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent } from "react";
+import { ArrowRight, ArrowLeft, Check, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { questions, scoreAnswers, interestLabels, type QuizLanguage } from "@/lib/quiz";
+import Analytics from "./analytics";
+import CameraInvite, { type CameraHandle } from "./camera";
+import Mascot, { type MascotHandle } from "./mascot";
+import { createSessionSync, type SaveState } from "@/lib/session-sync";
+import CareerResults from "./career-results";
+import { Header, Footer } from "./shell";
+
+type Phase = "welcome" | "quiz" | "result" | "contact" | "success";
+type Session = { id: string; token: string };
+
+async function api(path: string, method: string, payload: unknown, signal?: AbortSignal) {
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(12000)]) : AbortSignal.timeout(12000),
+    });
+  } catch {
+    throw Error("Нет соединения. Попробуйте ещё раз — ваши ответы остались на экране.");
+  }
+  const data = await response.json() as { error?: string; answers?: number[] };
+  if (!response.ok) throw Error(data.error || "Не удалось сохранить. Попробуйте ещё раз.");
+  return data;
+}
+
+export default function Home() {
+  const [language, setLanguage] = useState<QuizLanguage>('ru');
+  const en=language==='en';
+  const [editing,setEditing]=useState(false);
+  const [phase, setPhase] = useState<Phase>("welcome");
+  const [answers, setAnswers] = useState<number[]>([]);
+  const [step, setStep] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [saveError, setSaveError] = useState('');
+  const sessionSync = useRef<ReturnType<typeof createSessionSync> | null>(null);
+  const generation = useRef(0);
+  const [busy, setBusy] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
+  const [error, setError] = useState("");
+  const [greeting, setGreeting] = useState("");
+  const [revision, setRevision] = useState(0);
+  const [idleLeft, setIdleLeft] = useState(120);
+  const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
+  const [contact, setContact] = useState("");
+  const [interest, setInterest] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const touched = useRef(0);
+  const title = useRef<HTMLHeadingElement>(null);
+  const submitLock = useRef(false);
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mascot = useRef<MascotHandle>(null);
+  const invitations = useRef<CameraHandle>(null);
+  const greetingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const greet = useCallback((text: string) => {
+    setGreeting(text);
+    if (greetingTimer.current) clearTimeout(greetingTimer.current);
+    greetingTimer.current = setTimeout(() => setGreeting(""), 8000);
+  }, []);
+
+  const reset = useCallback(() => {
+    invitations.current?.stop();
+    generation.current++; sessionSync.current?.dispose(); sessionSync.current=null;
+    if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    setSaveState('idle'); setSaveError('');
+    setPhase("welcome"); setEditing(false); setAnswers([]); setStep(0); setSelected(null);
+    setSession(null); setBusy(false); setAdvancing(false); setError("");
+    setName(""); setCompany(""); setContact(""); setInterest(""); setConsent(false);
+    setGreeting("");
+    if (greetingTimer.current) clearTimeout(greetingTimer.current);
+    touched.current = Date.now(); setIdleLeft(120);
+    submitLock.current = false;
+  }, []);
+
+  useEffect(() => {
+    touched.current = Date.now();
+    const touch = () => { touched.current = Date.now(); };
+    window.addEventListener("pointerdown", touch);
+    window.addEventListener("keydown", touch);
+    const timer = setInterval(() => {
+      if (phase === "welcome" || busy || advancing || settingsOpen) return;
+      const limit = phase === "success" ? 20 : 120;
+      const left = Math.max(0, limit - Math.floor((Date.now() - touched.current) / 1000));
+      setIdleLeft(left);
+      if (left === 0) reset();
+    }, 1000);
+    return () => {
+      window.removeEventListener("pointerdown", touch);
+      window.removeEventListener("keydown", touch);
+      clearInterval(timer);
+    };
+  }, [phase, busy, advancing, settingsOpen, reset]);
+
+  useEffect(() => {
+    const heading = title.current;
+    heading?.focus({ preventScroll: true });
+    if (heading) {
+      const rect = heading.getBoundingClientRect();
+      if (rect.top < 0 || rect.bottom > window.innerHeight) heading.scrollIntoView({ block: "start" });
+    }
+
+  }, [phase, step]);
+
+  useEffect(() => () => {
+    generation.current++; sessionSync.current?.dispose();
+    if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    if (greetingTimer.current) clearTimeout(greetingTimer.current);
+  }, []);
+
+  const result = answers.length === questions.length ? scoreAnswers(answers) : null;
+  const mascotMood = error ? "reassuring" : busy ? "thinking" : phase === "result" || phase === "success" ? "celebrate" : advancing ? "acknowledge" : phase === "quiz" ? "thinking" : "neutral";
+
+  function start() {
+    if (submitLock.current) return;
+    submitLock.current=true; setAdvancing(true);
+    transitionTimer.current=setTimeout(()=>{submitLock.current=false;setAdvancing(false);},220);
+    setError(''); setSaveError(''); setSaveState('idle'); setGreeting('');
+    const current = { id: crypto.randomUUID(), token: crypto.randomUUID() };
+    const owner = ++generation.current;
+    sessionSync.current?.dispose();
+    const sync = createSessionSync(current, (method,payload,signal)=>api('/api/sessions',method,payload,signal), state=>{
+      if (generation.current !== owner) return;
+      setSaveState(state); if(state==='saved'){setSaveError('');setRevision(x=>x+1);}
+    });
+    sessionSync.current=sync; setSession(current);
+    setPhase('quiz'); setIdleLeft(120); touched.current=Date.now();
+    // The visitor can participate immediately, including during a slow or failed start request.
+    void sync.start().catch(()=>{});
+  }
+
+  async function persistResult(completed: number[]) {
+    const owner=generation.current;
+    setSaveError('');
+    try { await sessionSync.current?.finish(completed); }
+    catch { if(generation.current===owner) setSaveError('Результат готов. Пока не удалось добавить его в аналитику стенда.'); }
+  }
+
+  async function answer(value: number, event?: MouseEvent<HTMLButtonElement>) {
+    if (submitLock.current) return;
+    submitLock.current = true; setSelected(value); setError("");
+    if(event){const rect=event.currentTarget.getBoundingClientRect();mascot.current?.reactTo(event.detail?event.clientX:rect.left+rect.width/2,event.detail?event.clientY:rect.top+rect.height/2,rect);}
+    const nextAnswers = [...answers];
+    nextAnswers[step] = value;
+    setAnswers(nextAnswers);
+
+    if (!editing && step < questions.length - 1) {
+      setAdvancing(true);
+      transitionTimer.current = setTimeout(() => {
+        setStep(step + 1);
+        setSelected(nextAnswers[step + 1] ?? null);
+        // Keep the new answer buttons disabled briefly so a double tap cannot answer two questions.
+        transitionTimer.current = setTimeout(() => {
+          setAdvancing(false); submitLock.current = false;
+        }, 220);
+      }, 180);
+      return;
+    }
+
+    // The payoff is local and immediate. Neither saving nor AI speech can gate this screen.
+    setPhase('result'); setEditing(false); setGreeting(''); setIdleLeft(120);
+    submitLock.current=false;
+    void persistResult(nextAnswers);
+  }
+
+  async function save(event: FormEvent) {
+    event.preventDefault();
+    if (submitLock.current) return;
+    submitLock.current = true; setBusy(true); setError("");
+    const owner=generation.current;
+    try {
+      if (!sessionSync.current) throw Error("Начните знакомство заново.");
+      await sessionSync.current.finish(answers);
+      if(generation.current!==owner)return;
+      await api("/api/leads", "POST", { ...session, name, company, contact, interest, consent });
+      if(generation.current!==owner)return;
+      setName(""); setCompany(""); setContact(""); setConsent(false);
+      setPhase("success"); setIdleLeft(20); setRevision(x => x + 1);
+    } catch (e) { if(generation.current===owner)setError((e as Error).message); }
+    finally { if(generation.current===owner){setBusy(false); submitLock.current = false;} }
+  }
+
+  function back() {
+    if (busy || advancing || step === 0) return;
+    setStep(step - 1); setSelected(answers[step - 1] ?? null); setError("");
+  }
+
+  const gameContext = useMemo(() => ({ phase, step, answers, selected, interest }), [phase, step, answers, selected, interest]);
+
+  return <div className={`app-shell visitor-shell career-shell state-${phase}`}>
+    <Header actions={<CameraInvite ref={invitations} game={gameContext} onLanguageChange={setLanguage} onActivity={() => { touched.current = Date.now(); }} idle={phase === "welcome" && !busy} onGreeting={greet} onMotion={point => mascot.current?.notice(point)} onFace={point => mascot.current?.trackFace(point)} onSpeech={frame => mascot.current?.speak(frame)} onOpenChange={setSettingsOpen} />} />
+    <main className={`booth-grid phase-${phase}`}>
+      <section className="play-panel" aria-label="Игра с Нави">
+        {phase !== "welcome" && <div className="panel-top">
+          <div className="panel-companion"><Mascot ref={mascot} compact mood={mascotMood} active={!settingsOpen} onGreet={() => invitations.current?.invite()} /><span className="panel-product">Нави <span>· NavTech</span></span></div>
+          <Button variant="ghost" className="reset-button" disabled={busy || advancing} onClick={reset}>{en?'End test':'Завершить'}</Button>
+        </div>}
+
+        {phase !== "welcome" && greeting && <p className="game-caption voice-caption-subordinate" aria-live="polite">{greeting}</p>}
+
+        {phase === "welcome" && <div className="welcome">
+          <div className="welcome-copy">
+            <div className="navi-playground"><Mascot ref={mascot} mood={mascotMood} active={!settingsOpen && !busy} onGreet={() => invitations.current?.invite()} /></div>
+            <span className="career-welcome-label">{en?'Find your next direction':'Найдите своё направление'}</span><h1 ref={title} tabIndex={-1}>{en?<>What would you<br/>like to build?</>:<>Какая работа<br/>вам интересна?</>}</h1>
+            <p>{en?<>Eight real work situations.<br/>Three career directions and a first project.</>:<>Восемь рабочих ситуаций.<br/>Три профессии и первый проект для пробы.</>}</p>
+            <Button className="primary-button invitation-button" onClick={start}>{en?'Explore my matches':'Найти свои направления'}<ArrowRight /></Button>
+            <span className="welcome-time">{en?'2–3 minutes · no experience needed':'2–3 минуты · опыт не требуется'}</span>
+            <span className="live-disclosure">{en?'Tap Navi to talk with AI through your microphone and OpenAI.':'Нажатие на Нави включает разговор с ИИ через микрофон и OpenAI.'}</span>
+            {error ? <p className="greeting-line welcome-error" role="alert">{error}</p> : <p className="greeting-line" aria-live="polite">{greeting}</p>}
+          </div>
+
+        </div>}
+
+        {phase === "quiz" && <div className="flow-content quiz-content">
+          <div className="quiz-progress"><span>{en?'Situation':'Ситуация'} {step + 1} / {questions.length}</span><span>{en?'Choose what you would prefer to try':'Выберите, что интереснее попробовать'}</span></div>
+          <Progress value={(step + 1) / questions.length * 100} aria-label={`${step+1} / ${questions.length}`} className="quiz-progress-bar" />
+          <h1 ref={title} tabIndex={-1} className="flow-title">{en?questions[step].en:questions[step].title}</h1>
+
+          <div className="answer-list" key={step}>
+            {questions[step].options.map((option, index) => <Button
+              key={index}
+              variant="ghost"
+              className={`answer-button ${selected === index ? "selected" : ""}`}
+              disabled={busy || advancing}
+              onClick={event => answer(index,event)}
+            ><span>{en?option.en:option.text}</span>{selected === index && <Check />}</Button>)}
+          </div>
+          <div className="question-footer">
+            <Button variant="ghost" className="back-button" disabled={busy || advancing || (!editing&&step === 0)} onClick={()=>editing?(setEditing(false),setPhase('result')):back()}><ArrowLeft />{editing?(en?'Back to results':'К результату'):(en?'Back':'Назад')}</Button>
+            <span role="status">{busy ? "Собираем результат…" : ""}</span>
+          </div>
+        </div>}
+
+        {phase === "result" && result && <div className="flow-content result-content">
+          <CareerResults key={answers.join(',')} answers={answers} language={language} onEdit={index=>{setEditing(true);setStep(index);setSelected(answers[index]);setPhase('quiz');}} onContact={()=>{setInterest('career');setPhase('contact');}} onReset={reset}/>
+          {(saveState==='error'||saveError)&&<div className="result-save-notice" role="status"><span>{en?'Your result is ready. The booth statistics have not been updated yet.':'Результат готов. Пока не удалось добавить его в аналитику стенда.'}</span><Button variant="ghost" onClick={()=>void persistResult(answers)} disabled={saveState==='saving'}>{en?'Retry saving':'Повторить сохранение'}</Button></div>}
+        </div>}
+
+        {phase === "contact" && <form className="flow-content contact-form" onSubmit={save}>
+          <h1 ref={title} tabIndex={-1} className="flow-title">{interest === "career" ? "Познакомимся ближе." : "Разберём задачу вашей команды."}</h1>
+          <p className="flow-description">{interest === "career" ? "Обсудим ваши интересы и возможности в NavTech." : "На короткой встрече выберем один процесс и покажем подход на примере. Оставьте контакт, чтобы договориться о времени."}</p>
+          <div className="contact-fields">
+            <label className="form-field">Ваше имя<Input autoComplete="off" maxLength={80} minLength={2} required value={name} onChange={e => setName(e.target.value)} placeholder="Как к вам обращаться" /></label>
+            <label className="form-field">Телефон, email или Telegram<Input autoComplete="off" required maxLength={150} value={contact} onChange={e => setContact(e.target.value)} placeholder="+992 … / name@company.tj / @username" /></label>
+          </div>
+          <details className="company-details"><summary>Добавить компанию<ChevronDown size={15} /></summary><label className="form-field"><span className="visually-hidden">Компания</span><Input autoComplete="off" maxLength={120} value={company} onChange={e => setCompany(e.target.value)} placeholder="Название компании" /></label></details>
+          <div className="contact-topic"><span>Тема разговора</span><Select value={interest} onValueChange={setInterest} required><SelectTrigger aria-label="Тема разговора"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(interestLabels).map(([id,label]) => <SelectItem key={id} value={id}>{label}</SelectItem>)}</SelectContent></Select></div>
+          <label className="consent-label"><Checkbox checked={consent} onCheckedChange={value => setConsent(value === true)} aria-label="Согласие на связь с NavTech" /><span>Согласен передать NavTech имя, контакт, компанию и игровой профиль для связи по выбранной теме. Отозвать согласие: <a href="mailto:info@navtech.tj">info@navtech.tj</a>.</span></label>
+          <div className="result-actions"><Button type="submit" className="primary-button" disabled={!consent || !interest || busy}>{busy ? "Сохраняем…" : "Договориться о разборе"}<ArrowRight /></Button><Button type="button" variant="ghost" className="skip-button" disabled={busy} onClick={() => setPhase("result")}>К результату</Button></div>
+        </form>}
+
+        {phase === "success" && <div className="flow-content success-content">
+          <div className="success-icon"><Check /></div>
+          <h1 ref={title} tabIndex={-1} className="flow-title">Спасибо за знакомство.</h1>
+          <p>Запрос на разбор сохранён.<br />Команда свяжется с вами, чтобы выбрать время.</p>
+          <Button className="primary-button" onClick={reset}>Следующий участник<ArrowRight /></Button>
+          <span className="fine-print">Новая игра через {idleLeft} сек.</span>
+        </div>}
+
+        {error && phase !== "welcome" && <div className="form-error" role="alert"><p>{error}</p></div>}
+        {phase !== "welcome" && phase !== "success" && idleLeft <= 15 && <div className="timeout-notice" role="alert">Новая игра через {idleLeft} сек.<Button variant="outline" onClick={() => { touched.current = Date.now(); setIdleLeft(120); }}>Я ещё здесь</Button></div>}
+      </section>
+    </main>
+    <Analytics revision={revision} compact language={language}/>
+    <Footer />
+  </div>;
+}

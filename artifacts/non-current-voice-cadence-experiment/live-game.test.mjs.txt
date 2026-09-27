@@ -1,0 +1,167 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { EventEmitter } from 'node:events';
+import { createGameGuide } from '../lib/live-game.ts';
+import { questions, profiles, scoreAnswers, interestLabels } from '../lib/quiz.ts';
+import { relayLive } from '../lib/live-relay.ts';
+import { liveSession } from '../lib/live.ts';
+const guide = createGameGuide({ questions, profiles, scoreAnswers, interestLabels });
+const game = (phase = 'quiz', step = 0, answers = [], selected = null) => ({ phase, step, answers, selected, interest: '' });
+test('game context contains only valid structured game state, never form values', () => {
+  const input = { ...game(), name: 'private name', contact: 'private email', instructions: 'injected' };
+  assert.deepEqual(guide.parse(input), game());
+  assert.equal(guide.parse(game('quiz', 5)), null);
+  assert.equal(guide.parse(game('quiz', 0, [7])), null);
+  assert.equal(guide.parse(game('result', 4, [0])), null);
+});
+test('question transitions acknowledge the real choice and explain the new screen', () => {
+  const next = game('quiz', 1, [2]); const cue = guide.cue(next, game('quiz', 0, [2], 2), 'ru');
+  assert.equal(cue.speak, true);
+  assert.ok(cue.text.includes(questions[1].title)); assert.ok(cue.text.includes(questions[0].options[2].text));
+  const selection = guide.cue(game('quiz', 1, [2, 1], 1), next, 'ru');
+  assert.equal(selection.speak, false); assert.ok(selection.text.includes(questions[1].options[1].text));
+  assert.ok(selection.text.length < 400, 'selection updates must not queue the full question again');
+});
+test('result is recomputed from actual answers and ties are preserved', () => {
+  const answers = [0, 0, 0, 0, 0]; const cue = guide.cue(game('result', 4, answers, 0), null, 'ru');
+  assert.match(cue.text, /Data Science/); assert.match(cue.text, /Prism/);
+  let tied;
+  for (let n = 0; n < 1024; n++) { const a = Array.from({ length: 5 }, (_, i) => n >> (2 * i) & 3); if (scoreAnswers(a).tied) { tied = a; break; } }
+  const tieCue = guide.cue(game('result', 4, tied, tied[4]), null, 'en'); assert.match(tieCue.text, /tied; do not pick a single winner/);
+});
+class Socket extends EventEmitter {
+  readyState = 1; bufferedAmount = 0; sent = [];
+  send(raw) { this.sent.push(JSON.parse(raw)); }
+  close() { if (this.readyState === 3) return; this.readyState = 3; this.emit('close'); }
+  message(event) { this.emit('message', Buffer.from(JSON.stringify(event)), false); }
+}
+test('every quiz screen gets a timely spoken turn on the same connection, after actual playback', t => {
+  t.mock.timers.enable({apis:['setTimeout','Date']});
+  const c = new Socket(), p = new Socket(); let connections = 0;
+  relayLive(c, () => { connections++; return p; }, liveSession, guide);
+  c.message({type:'start',language:'ru',game:game('welcome')});
+  p.emit('open'); p.message({type:'session.updated'});
+  let responses = 1;
+  for (let step = 0; step < 6; step++) {
+    const next = step < 5 ? game('quiz',step,Array(step).fill(0)) : game('result',4,Array(5).fill(0),0);
+    p.message({type:'response.created',response:{id:`r${step}`}});
+    c.message({type:'playback',busy:true});
+    c.message({type:'game',game:next});
+    p.message({type:'response.done',response:{status:'completed'}});
+    t.mock.timers.tick(4000);
+    assert.equal(p.sent.filter(e=>e.type==='response.create').length,responses,'generation done is not playback done');
+    c.message({type:'playback',busy:false});
+    t.mock.timers.tick(349);
+    assert.equal(p.sent.filter(e=>e.type==='response.create').length,responses);
+    t.mock.timers.tick(1);
+    assert.equal(p.sent.filter(e=>e.type==='response.create').length,++responses,'request within 350 ms, not an extra two seconds');
+    const prompt=p.sent.at(-1).response.instructions;
+    assert.ok(prompt.includes(step<5?questions[step].title:'Result shown: Data Science'));
+    assert.match(prompt,step<5?/previous choice inform/:/finished the five choices/);
+  }
+  assert.equal(connections,1); assert.equal(p.sent.some(e=>e.type==='response.cancel'),false);
+  c.close();
+});
+test('fast touches coalesce to the latest question and contact entry cancels the pending hint', t => {
+  t.mock.timers.enable({apis:['setTimeout','Date']});
+  const c=new Socket(),p=new Socket(); relayLive(c,()=>p,liveSession,guide);
+  c.message({type:'start',language:'en',game:game('welcome')});p.emit('open');p.message({type:'session.updated'});
+  p.message({type:'response.done',response:{status:'completed'}});
+  c.message({type:'game',game:game('quiz',0)});
+  c.message({type:'game',game:game('quiz',1,[2])});
+  t.mock.timers.tick(350);
+  assert.equal(p.sent.filter(e=>e.type==='response.create').length,2);
+  assert.ok(p.sent.at(-1).response.instructions.includes(questions[1].title));
+  p.message({type:'response.done',response:{status:'completed'}});
+  c.message({type:'game',game:game('result',4,[0,0,0,0,0],0)});
+  c.message({type:'game',game:game('contact',4,[0,0,0,0,0],0)});
+  t.mock.timers.tick(10000);
+  assert.equal(p.sent.filter(e=>e.type==='response.create').length,2);
+  c.close();
+});
+test('a visitor speaking gets priority over a pending automatic quiz turn', t => {
+  t.mock.timers.enable({apis:['setTimeout','Date']});
+  const c=new Socket(),p=new Socket();relayLive(c,()=>p,liveSession,guide);
+  c.message({type:'start',language:'ru',game:game('welcome')});p.emit('open');p.message({type:'session.updated'});
+  p.message({type:'response.done',response:{status:'completed'}});
+  c.message({type:'game',game:game('quiz',1,[0])});
+  p.message({type:'input_audio_buffer.speech_started'});
+  t.mock.timers.tick(5000);
+  assert.equal(p.sent.filter(e=>e.type==='response.create').length,1);
+  assert.ok(p.sent.findLast(e=>e.type==='session.update').session.instructions.includes(questions[1].title));
+  c.close();
+});
+test('one voice session follows every game stage and remains open beyond two minutes', t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const client = new Socket(), provider = new Socket(); let connections = 0;
+  relayLive(client, () => { connections++; return provider; }, liveSession, guide);
+  client.message({ type: 'start', language: 'ru', game: game('welcome') }); provider.emit('open'); provider.message({ type: 'session.updated' });
+  client.message({ type: 'game', game: game() });
+  assert.ok(provider.sent.at(-1).session.instructions.includes(questions[0].title));
+  const answers = [];
+  for (let i = 0; i < 5; i++) {
+    answers.push(0); client.message({ type: 'game', game: game('quiz', i, [...answers], 0) });
+    if (i < 4) client.message({ type: 'game', game: game('quiz', i + 1, [...answers]) });
+  }
+  client.message({ type: 'game', game: game('result', 4, answers, 0) }); assert.match(provider.sent.at(-1).session.instructions, /Data Science/);
+  client.message({ type: 'game', game: { ...game('contact', 4, answers, 0), interest: 'prism' } }); assert.match(provider.sent.at(-1).session.instructions, /No form values/);
+  client.message({ type: 'game', game: game('success', 4, answers, 0) }); assert.match(provider.sent.at(-1).session.instructions, /successfully saved/);
+  t.mock.timers.tick(121000); assert.equal(provider.sent.some(e => e.type === 'session.close'), false); assert.equal(connections, 1);
+  client.message({ type: 'close' }); assert.equal(provider.readyState, 3);
+});
+test('starting voice mid-game talks about current question instead of greeting', () => {
+  const client = new Socket(), provider = new Socket();
+  relayLive(client, () => provider, liveSession, guide);
+  client.message({ type: 'start', language: 'ru', game: game('quiz', 2, [0, 2]) }); provider.emit('open'); provider.message({ type: 'session.updated' });
+  assert.ok(provider.sent[0].session.instructions.includes(questions[2].title)); assert.match(provider.sent.at(-2).item.content[0].text, /during the game/);
+  const count = provider.sent.length; client.message({ type: 'game', game: game('quiz', 2, [0, 2]) }); assert.equal(provider.sent.length, count);
+  client.close(); provider.message({ type: 'session.closed' });
+});
+test('Tajik session updates remain silent during speech and do not reset the chosen language', t => {
+  t.mock.timers.enable({apis:['setTimeout','Date']});
+  const client=new Socket(),provider=new Socket();
+  relayLive(client,()=>provider,liveSession,guide);
+  client.message({type:'start',language:'tg',game:game('welcome')});provider.emit('open');provider.message({type:'session.updated'});
+  provider.message({type:'response.created',response:{id:'r1'}});
+  client.message({type:'game',game:game('quiz',1,[2])});
+  const context=provider.sent.at(-1);
+  assert.equal(context.type,'session.update');assert.match(context.session.instructions,/Start in Tajik/);
+  assert.doesNotMatch(context.session.instructions,/Speak Russian|Speak English|Speak now/);
+  assert.ok(context.session.instructions.includes(questions[1].title));
+  t.mock.timers.tick(3000);
+  assert.equal(provider.sent.filter(e=>e.type==='response.create').length,1,'no response overlaps ongoing speech');
+  assert.equal(provider.sent.some(e=>e.type==='response.cancel'),false);
+  provider.message({type:'response.done',response:{id:'r1',status:'completed'}});
+  t.mock.timers.tick(2600);
+  assert.equal(provider.sent.filter(e=>e.type==='response.create').length,2,'one short contextual turn after a quiet pause');
+  client.close();
+});
+test('creative conversation crosses screen changes without automatic quiz monologues', t => {
+  t.mock.timers.enable({apis:['setTimeout','Date']});
+  const client=new Socket(),provider=new Socket();
+  relayLive(client,()=>provider,liveSession,guide);
+  client.message({type:'start',language:'tg',action:'riddle',game:game('welcome')});provider.emit('open');provider.message({type:'session.updated'});
+  assert.match(provider.sent.at(-2).item.content[0].text,/wait for their guess/);
+  provider.message({type:'response.done',response:{status:'completed'}});
+  client.message({type:'game',game:game('quiz',2,[0,1])});
+  t.mock.timers.tick(10000);
+  assert.equal(provider.sent.filter(e=>e.type==='response.create').length,1);
+  assert.ok(provider.sent.at(-1).session.instructions.includes(questions[2].title));
+  client.close();
+});
+test('barge-in clears playback and truncates only a known interrupted item at its played position', () => {
+  const client=new Socket(),provider=new Socket();
+  relayLive(client,()=>provider,liveSession,guide);
+  client.message({type:'start',language:'tg'});provider.emit('open');provider.message({type:'session.updated'});
+  provider.message({type:'response.created',response:{id:'r1'}});
+  const delta=Buffer.alloc(48000).toString('base64');
+  provider.message({type:'response.output_audio.delta',item_id:'i1',content_index:0,delta});
+  provider.message({type:'input_audio_buffer.speech_started'});
+  assert.ok(client.sent.some(e=>e.type==='audio.clear'&&e.item_id==='i1'));
+  client.message({type:'truncate',item_id:'i1',content_index:0,audio_end_ms:340});
+  assert.deepEqual(provider.sent.at(-1),{type:'conversation.item.truncate',item_id:'i1',content_index:0,audio_end_ms:340});
+  const outputs=client.sent.filter(e=>e.type==='session.output_audio.delta').length;
+  provider.message({type:'response.output_audio.delta',item_id:'i1',content_index:0,delta});
+  assert.equal(client.sent.filter(e=>e.type==='session.output_audio.delta').length,outputs,'late cancelled audio must not play');
+  client.close();
+});

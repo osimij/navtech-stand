@@ -1,0 +1,225 @@
+{
+  "model": "gpt-realtime-1.5",
+  "samples": [
+    {
+      "voice": "cedar",
+      "language": "ru",
+      "file": "/audio/voice-comparison/cedar-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 7.8,
+      "firstAudioMs": 2099,
+      "bytes": 374400,
+      "status": "ready"
+    },
+    {
+      "voice": "alloy",
+      "language": "ru",
+      "file": "/audio/voice-comparison/alloy-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 7.95,
+      "firstAudioMs": 2221,
+      "bytes": 381600,
+      "status": "ready"
+    },
+    {
+      "voice": "alloy",
+      "language": "en",
+      "file": "/audio/voice-comparison/alloy-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 7.2,
+      "firstAudioMs": 1745,
+      "bytes": 345600,
+      "status": "ready"
+    },
+    {
+      "voice": "ash",
+      "language": "ru",
+      "file": "/audio/voice-comparison/ash-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 9.75,
+      "firstAudioMs": 2148,
+      "bytes": 468000,
+      "status": "ready"
+    },
+    {
+      "voice": "ash",
+      "language": "en",
+      "file": "/audio/voice-comparison/ash-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 7.55,
+      "firstAudioMs": 1929,
+      "bytes": 362400,
+      "status": "ready"
+    },
+    {
+      "voice": "ballad",
+      "language": "ru",
+      "file": "/audio/voice-comparison/ballad-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 9.5,
+      "firstAudioMs": 1838,
+      "bytes": 456000,
+      "status": "ready"
+    },
+    {
+      "voice": "ballad",
+      "language": "en",
+      "file": "/audio/voice-comparison/ballad-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 8.05,
+      "firstAudioMs": 2180,
+      "bytes": 386400,
+      "status": "ready"
+    },
+    {
+      "voice": "coral",
+      "language": "ru",
+      "file": "/audio/voice-comparison/coral-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 9,
+      "firstAudioMs": 2200,
+      "bytes": 432000,
+      "status": "ready"
+    },
+    {
+      "voice": "coral",
+      "language": "en",
+      "file": "/audio/voice-comparison/coral-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 8,
+      "firstAudioMs": 1789,
+      "bytes": 384000,
+      "status": "ready"
+    },
+    {
+      "voice": "echo",
+      "language": "ru",
+      "file": "/audio/voice-comparison/echo-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 8.3,
+      "firstAudioMs": 1822,
+      "bytes": 398400,
+      "status": "ready"
+    },
+    {
+      "voice": "echo",
+      "language": "en",
+      "file": "/audio/voice-comparison/echo-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 7.8,
+      "firstAudioMs": 1657,
+      "bytes": 374400,
+      "status": "ready"
+    },
+    {
+      "voice": "sage",
+      "language": "ru",
+      "file": "/audio/voice-comparison/sage-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 10.35,
+      "firstAudioMs": 1752,
+      "bytes": 496800,
+      "status": "ready"
+    },
+    {
+      "voice": "sage",
+      "language": "en",
+      "file": "/audio/voice-comparison/sage-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 8.25,
+      "firstAudioMs": 2008,
+      "bytes": 396000,
+      "status": "ready"
+    },
+    {
+      "voice": "shimmer",
+      "language": "ru",
+      "file": "/audio/voice-comparison/shimmer-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 8.9,
+      "firstAudioMs": 1798,
+      "bytes": 427200,
+      "status": "ready"
+    },
+    {
+      "voice": "shimmer",
+      "language": "en",
+      "file": "/audio/voice-comparison/shimmer-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 9.15,
+      "firstAudioMs": 2084,
+      "bytes": 439200,
+      "status": "ready"
+    },
+    {
+      "voice": "verse",
+      "language": "ru",
+      "file": "/audio/voice-comparison/verse-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 9.65,
+      "firstAudioMs": 1822,
+      "bytes": 463200,
+      "status": "ready"
+    },
+    {
+      "voice": "verse",
+      "language": "en",
+      "file": "/audio/voice-comparison/verse-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 8.15,
+      "firstAudioMs": 2269,
+      "bytes": 391200,
+      "status": "ready"
+    },
+    {
+      "voice": "marin",
+      "language": "ru",
+      "file": "/audio/voice-comparison/marin-ru.wav",
+      "transcript": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 7.25,
+      "firstAudioMs": 2156,
+      "bytes": 348000,
+      "status": "ready"
+    },
+    {
+      "voice": "marin",
+      "language": "en",
+      "file": "/audio/voice-comparison/marin-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 7.25,
+      "firstAudioMs": 1779,
+      "bytes": 348000,
+      "status": "ready"
+    },
+    {
+      "voice": "cedar",
+      "language": "en",
+      "file": "/audio/voice-comparison/cedar-en.wav",
+      "transcript": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 7.2,
+      "firstAudioMs": 1957,
+      "bytes": 345600,
+      "status": "ready"
+    }
+  ]
+}

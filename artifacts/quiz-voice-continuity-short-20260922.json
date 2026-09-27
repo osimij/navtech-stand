@@ -1,0 +1,72 @@
+{
+  "at": "2026-09-21T22:59:24.195Z",
+  "kind": "synthetic relay rehearsal; simulated 24 kHz playback, no microphone or database writes",
+  "turns": [
+    {
+      "screen": "welcome",
+      "changedAt": 28.525375,
+      "text": "Привет! Я Нави. С чего начнём?",
+      "audioMs": 2900,
+      "requestMs": 2240,
+      "firstPacketMs": 2891,
+      "firstSignalMs": 2891
+    },
+    {
+      "screen": "question_1",
+      "changedAt": 5825.468791,
+      "text": "Выбирайте, с чего начнёте новую задачу.",
+      "audioMs": 3050,
+      "requestMs": 627,
+      "firstPacketMs": 1178,
+      "firstSignalMs": 1178
+    },
+    {
+      "screen": "question_2",
+      "changedAt": 10057.2905,
+      "text": "Что охотно делегируете после поиска закономерностей?",
+      "audioMs": 4550,
+      "requestMs": 621,
+      "firstPacketMs": 2045,
+      "firstSignalMs": 2045
+    },
+    {
+      "screen": "question_3",
+      "changedAt": 16655.537958,
+      "text": "Как проверим смелую идею данными или результатом для пользователя?",
+      "audioMs": 6150,
+      "requestMs": 680,
+      "firstPacketMs": 1634,
+      "firstSignalMs": 1634
+    },
+    {
+      "screen": "question_4",
+      "changedAt": 24442.175375,
+      "text": "Какой результат вас радует больше после проверки данных?",
+      "audioMs": 3900,
+      "requestMs": 618,
+      "firstPacketMs": 1833,
+      "firstSignalMs": 1833
+    },
+    {
+      "screen": "question_5",
+      "changedAt": 30180.140208,
+      "text": "Как проведёте свободный день после разгадки закономерности?",
+      "audioMs": 4100,
+      "requestMs": 623,
+      "firstPacketMs": 1831,
+      "firstSignalMs": 1832
+    },
+    {
+      "screen": "result",
+      "changedAt": 36114.834416,
+      "text": "Ваш путь — анализ данных. Хотите взглянуть на демо Prism с агрегированными аналитиками стенда?",
+      "audioMs": 6150,
+      "requestMs": 619,
+      "firstPacketMs": 1604,
+      "firstSignalMs": 1604
+    }
+  ],
+  "errors": [],
+  "closed": true,
+  "pass": true
+}

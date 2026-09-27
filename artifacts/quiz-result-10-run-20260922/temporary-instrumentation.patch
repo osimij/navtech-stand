@@ -1,0 +1,69 @@
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -23,7 +23,7 @@
+   try {
+     response = await fetch(path, {
+       method,
+-      headers: { "Content-Type": "application/json" },
++      headers: { "Content-Type": "application/json", ...(method === "PATCH" && new URLSearchParams(location.search).has("qa_result_run") ? {"x-result-rehearsal": new URLSearchParams(location.search).get("qa_result_mode") || "normal"} : {}) },
+       body: JSON.stringify(payload),
+       signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(12000)]) : AbortSignal.timeout(12000),
+     });
+@@ -36,6 +36,8 @@
+ }
+ 
+ export default function Home() {
++  const qaInput = useRef<number|null>(null);
++  const [qaResult, setQaResult] = useState<Record<string,unknown>|null>(null);
+   const [phase, setPhase] = useState<Phase>("welcome");
+   const [answers, setAnswers] = useState<number[]>([]);
+   const [step, setStep] = useState(0);
+@@ -65,6 +67,23 @@
+   const invitations = useRef<CameraHandle>(null);
+   const greetingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+ 
++  useEffect(() => {
++    if (phase !== 'result' || qaInput.current === null || !session) return;
++    let frame=0, cancelled=false;
++    const measure=()=>{
++      if(cancelled)return;
++      const heading=title.current, list=document.querySelector('.advice-steps');
++      const rect=heading?.getBoundingClientRect();
++      let visible=Boolean(heading && rect && rect.width>0 && rect.height>0 && rect.top>=0 && rect.bottom<=innerHeight && !document.hidden && list?.children.length===3);
++      for(let el:Element|null=heading;el;el=el.parentElement){const css=getComputedStyle(el);if(css.display==='none'||css.visibility==='hidden'||Number(css.opacity)===0)visible=false;}
++      if(!visible){frame=requestAnimationFrame(measure);return;}
++      const now=performance.now(), params=new URLSearchParams(location.search);
++      setQaResult({run:params.get('qa_result_run'),condition:params.get('qa_result_mode'),route:'/',sessionId:session.id,answers:[...answers],timeOrigin:performance.timeOrigin,input:qaInput.current,visible:now,delta:now-qaInput.current!,heading:heading?.textContent,description:document.querySelector('.result-description')?.textContent,steps:Array.from(list!.children).map(el=>el.textContent),viewport:{width:innerWidth,height:innerHeight},documentVisible:!document.hidden});
++    };
++    frame=requestAnimationFrame(()=>{frame=requestAnimationFrame(measure);});
++    return()=>{cancelled=true;cancelAnimationFrame(frame);};
++  },[phase,session,answers]);
++
+   const greet = useCallback((text: string) => {
+     setGreeting(text);
+     if (greetingTimer.current) clearTimeout(greetingTimer.current);
+@@ -174,6 +193,7 @@
+       return;
+     }
+ 
++    if(new URLSearchParams(location.search).has('qa_result_run'))qaInput.current=event?.timeStamp ?? performance.now();
+     // The payoff is local and immediate. Neither saving nor AI speech can gate this screen.
+     setPhase('result'); setGreeting(''); setIdleLeft(120);
+     submitLock.current=false;
+@@ -300,6 +320,7 @@
+       </section>
+     </main>
+     <Analytics revision={revision} compact />
++    {qaResult&&<pre data-qa-result="true" style={{position:'fixed',bottom:0,left:0,zIndex:99,fontSize:9,maxWidth:460,maxHeight:90,overflow:'auto',background:'white'}}>{JSON.stringify({...qaResult,saveState,saveError})}</pre>}
+     <Footer />
+   </div>;
+ }
+--- a/app/api/sessions/route.ts
++++ b/app/api/sessions/route.ts
+@@ -11,5 +11,5 @@
+  let v;try{v=await body(req)}catch{return json({error:"Некорректный запрос"},400)}
+  if(!v||!Array.isArray(v.answers))return json({error:"Некорректные ответы"},400);
+  let result;try{result=scoreAnswers(v.answers)}catch{return json({error:"Ответьте на все пять вопросов"},400)}
+- try{const session=await authorizedSession(v.id,v.token);if(!session)return json({error:"Начните новую игру"},403);if(!session.completed_at)await db().prepare("UPDATE sessions SET completed_at=?, profile=?, answers=? WHERE id=? AND completed_at IS NULL").bind(new Date().toISOString(),result.profile,JSON.stringify(v.answers),v.id).run();const saved=await authorizedSession(v.id,v.token);return json({profile:saved?.profile,answers:JSON.parse(saved?.answers||"[]")})}catch(e){return unavailable(e)}
++ try{const session=await authorizedSession(v.id,v.token);if(!session)return json({error:"Начните новую игру"},403);const rehearsal=req.headers.get('x-result-rehearsal');if(rehearsal==='delay')await new Promise(resolve=>setTimeout(resolve,2500));if(rehearsal==='failure')return json({error:'Synthetic result rehearsal: save rejected'},503);if(!session.completed_at)await db().prepare("UPDATE sessions SET completed_at=?, profile=?, answers=? WHERE id=? AND completed_at IS NULL").bind(new Date().toISOString(),result.profile,JSON.stringify(v.answers),v.id).run();const saved=await authorizedSession(v.id,v.token);return json({profile:saved?.profile,answers:JSON.parse(saved?.answers||"[]")})}catch(e){return unavailable(e)}
+ }

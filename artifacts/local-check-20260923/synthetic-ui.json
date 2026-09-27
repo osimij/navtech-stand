@@ -1,0 +1,16 @@
+{
+  "tag": "NAVTECH_LOCAL_QA_20260923",
+  "session": {
+    "id": "8390ac7c-bd1c-4c42-a7c8-ff211a4a25c7",
+    "answers": "[1,1,2,3,0,1,2,3]",
+    "started_at": "2026-09-23T09:46:56.989Z",
+    "completed_at": "2026-09-23T09:48:13.253Z"
+  },
+  "revised": {
+    "id": "8390ac7c-bd1c-4c42-a7c8-ff211a4a25c7",
+    "answers": "[3,1,2,3,0,1,2,3]",
+    "started_at": "2026-09-23T09:46:56.989Z",
+    "completed_at": "2026-09-23T09:48:13.253Z"
+  },
+  "lead_id": "e18db575-ea07-4298-95a3-f935cc389ec1"
+}

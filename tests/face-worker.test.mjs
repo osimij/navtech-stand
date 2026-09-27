@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+// Exercise the actual worker protocol with a deterministic detector. This does not validate the camera model's accuracy.
+let detections=[],disposed=0,bitmapsClosed=0;
+const messages=[];
+const detector={detectForVideo(){return {detections};},close(){disposed++;}};
+const self={location:{href:'https://example.test/mediapipe/face-worker.js'},postMessage(message){messages.push(message);}};
+const context=vm.createContext({self,URL,Math,FaceDetector:{async createFromOptions(){return detector;}},FilesetResolver:{async forVisionTasks(){return {};}}});
+const source=fs.readFileSync(new URL('../public/mediapipe/face-worker.js',import.meta.url),'utf8').replace(/^import .*;$/m,'');
+vm.runInContext(source,context);
+await self.onmessage({data:{type:'init'}});
+assert.equal(messages.at(-1).type,'ready');
+const frame=()=>self.onmessage({data:{type:'frame',timestamp:100,bitmap:{width:320,height:240,close(){bitmapsClosed++;}}}});
+detections=[{boundingBox:{originX:20,originY:20,width:80,height:100}}];
+await frame();
+assert.equal(messages.at(-1).type,'position');
+assert.ok(messages.at(-1).point.x>0,'Camera horizontal position is mirrored');
+assert.ok(messages.at(-1).point.y<0,'High face returns upward target');
+detections=[{boundingBox:{originX:220,originY:100,width:90,height:100}},{boundingBox:{originX:22,originY:20,width:80,height:100}}];
+await frame();
+assert.ok(messages.at(-1).point.x>0,'Keep nearby similarly-sized face instead of jumping between people');
+detections=[{}];await frame();assert.equal(messages.at(-1).point,null,'Missing face box clears target');
+assert.equal(bitmapsClosed,3,'Every frame is released');
+await self.onmessage({data:{type:'dispose'}});assert.equal(disposed,1);
+await frame();assert.equal(bitmapsClosed,4,'A late frame is still released after shutdown');
+console.log('PASS: worker initialization, mirrored/vertical position, stable selection, missing face, frame release and shutdown. Model accuracy requires camera rehearsal.');

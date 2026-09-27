@@ -1,0 +1,72 @@
+{
+  "at": "2026-09-21T22:57:30.484Z",
+  "kind": "synthetic relay rehearsal; simulated 24 kHz playback, no microphone or database writes",
+  "turns": [
+    {
+      "screen": "welcome",
+      "changedAt": 30.981916,
+      "text": "Привет! Я Нави. С чего начнём?",
+      "audioMs": 3050,
+      "requestMs": 2715,
+      "firstPacketMs": 3103,
+      "firstSignalMs": 3103
+    },
+    {
+      "screen": "question_1",
+      "changedAt": 6190.621916,
+      "text": "Перед вами первый вопрос задачи: просто выберите, с чего начнёте, и посмотрим, куда это ведёт.",
+      "audioMs": 7250,
+      "requestMs": 622,
+      "firstPacketMs": 1315,
+      "firstSignalMs": 1316
+    },
+    {
+      "screen": "question_2",
+      "changedAt": 14761.966,
+      "text": "Вы уже выбрали поиск закономерностей; теперь выберите, что приятнее делегировать дальше.",
+      "audioMs": 6350,
+      "requestMs": 694,
+      "firstPacketMs": 1907,
+      "firstSignalMs": 1907
+    },
+    {
+      "screen": "question_3",
+      "changedAt": 23023.214625,
+      "text": "Вы уже настроены исследовать данные, так что выберите, как проверите смелую идею.",
+      "audioMs": 5650,
+      "requestMs": 612,
+      "firstPacketMs": 1165,
+      "firstSignalMs": 1166
+    },
+    {
+      "screen": "question_4",
+      "changedAt": 29843.080958,
+      "text": "После выбора данных для проверки, теперь выберите результат, который вас радует больше всего.",
+      "audioMs": 6000,
+      "requestMs": 616,
+      "firstPacketMs": 1343,
+      "firstSignalMs": 1343
+    },
+    {
+      "screen": "question_5",
+      "changedAt": 37191.786666,
+      "text": "Раз сложная закономерность уже стала ясной, выберите, как проведёте свободный день.",
+      "audioMs": 5500,
+      "requestMs": 638,
+      "firstPacketMs": 1383,
+      "firstSignalMs": 1383
+    },
+    {
+      "screen": "result",
+      "changedAt": 44079.388,
+      "text": "Ваш профиль — Data Science: игра показывает интересы, не даёт оценку для найма. Хотите коротко взглянуть на Prism с агрегированными аналитиками стенда?",
+      "audioMs": 9700,
+      "requestMs": 615,
+      "firstPacketMs": 1790,
+      "firstSignalMs": 1790
+    }
+  ],
+  "errors": [],
+  "closed": true,
+  "pass": true
+}

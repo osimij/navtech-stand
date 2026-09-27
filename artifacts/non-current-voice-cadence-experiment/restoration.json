@@ -1,0 +1,15 @@
+{
+  "restorationMethod": "Selective reversal of actual edits from this turn; no Git HEAD reset",
+  "restoredPaths": {
+    "lib/live-game.ts": "fe72a7380c9b63f1a6363fe7d4fc8fe345a7a3372b5e66630f994cf5d0d42319",
+    "lib/live-relay.ts": "f2fbfcebd8294ac2059ef84ea3efe8869782b334941d106d4424a7fae011dc51",
+    "lib/live-pcm-client.ts": "399bc4345c0b6365d4471900f1812203bc64b2712b3e71f09b6a617eeca00533",
+    "lib/live-diagnostics.ts": "cc752551ff54dfa9dbcd45eece77e7c510a8d1d31dbb8be48c66c69328e73756",
+    "tests/live-game.test.mjs": "319af880a52dbd61abf9ce2b0883e542ac1d34dca94675f06180093cf7e92505",
+    "VOICE-BRIEF.md": "7400e07108f491bbcf10e03a39293bb82b2505f32a8ae4e358380d6c26f91f36"
+  },
+  "extraProviderSessions": 2,
+  "bothClosed": true,
+  "voiceTestsPassed": 36,
+  "runtimeChangesRemaining": false
+}

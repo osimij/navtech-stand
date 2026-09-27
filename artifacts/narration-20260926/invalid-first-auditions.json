@@ -1,0 +1,276 @@
+{
+  "model": "gpt-realtime-1.5",
+  "createdAt": "2026-09-26T13:15:49.211Z",
+  "samples": [
+    {
+      "voice": "alloy",
+      "language": "en",
+      "file": "/audio/voice-comparison/alloy-en.wav",
+      "transcript": "Hi Navi, thanks for the open invitation. I'll think aloud and share my approach as we go. What kind of task did you have in mind to start with?",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 8.15,
+      "firstAudioMs": 1982,
+      "bytes": 391200,
+      "status": "ready"
+    },
+    {
+      "voice": "ash",
+      "language": "en",
+      "file": "/audio/voice-comparison/ash-en.wav",
+      "transcript": "Hi Navi, nice to meet you. I’m here to help and explore those approaches with you. What task did you have in mind, and how would you like me to start?",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 8.15,
+      "firstAudioMs": 1767,
+      "bytes": 391200,
+      "status": "ready"
+    },
+    {
+      "voice": "ballad",
+      "language": "en",
+      "file": "/audio/voice-comparison/ballad-en.wav",
+      "transcript": "Hey Navi, nice to meet you! I’ll share how I’d approach it, and we can explore from there. What’s the task you have in mind?",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 7.3,
+      "firstAudioMs": 1598,
+      "bytes": 350400,
+      "status": "ready"
+    },
+    {
+      "voice": "coral",
+      "language": "ru",
+      "file": "/audio/voice-comparison/coral-ru.wav",
+      "transcript": "Привет, Нави! Звучит интересно. Расскажи, какая задача у нас на повестке, и я поделюсь своим подходом.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 7.2,
+      "firstAudioMs": 1799,
+      "bytes": 345600,
+      "status": "ready"
+    },
+    {
+      "voice": "sage",
+      "language": "ru",
+      "file": "/audio/voice-comparison/sage-ru.wav",
+      "transcript": "Привет, Нави! Звучит как творческий эксперимент. Расскажи, о какой задаче идёт речь, и я поделюсь, как бы подошёл к её решению.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 9.65,
+      "firstAudioMs": 1644,
+      "bytes": 463200,
+      "status": "ready"
+    },
+    {
+      "voice": "shimmer",
+      "language": "ru",
+      "file": "/audio/voice-comparison/shimmer-ru.wav",
+      "transcript": "Привет, Нави! Я готов порассуждать и поделиться своим подходом. Расскажи, к какой задаче ты хочешь, чтобы я подошёл?",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 7.75,
+      "firstAudioMs": 1766,
+      "bytes": 372000,
+      "status": "ready"
+    },
+    {
+      "voice": "shimmer",
+      "language": "en",
+      "file": "/audio/voice-comparison/shimmer-en.wav",
+      "transcript": "Hi Navi, nice to meet you. I’m here to explore the options with you. How would you like to get started?",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 5.95,
+      "firstAudioMs": 1959,
+      "bytes": 285600,
+      "status": "ready"
+    },
+    {
+      "voice": "verse",
+      "language": "ru",
+      "file": "/audio/voice-comparison/verse-ru.wav",
+      "transcript": "Привет, Нави! Рад познакомиться. Давай попробуем — опиши задачу, и я расскажу, как бы я к ней подошёл.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 7.7,
+      "firstAudioMs": 2019,
+      "bytes": 369600,
+      "status": "ready"
+    },
+    {
+      "voice": "verse",
+      "language": "en",
+      "file": "/audio/voice-comparison/verse-en.wav",
+      "transcript": "Hi Navi, happy to explore this with you. Could you tell me a bit more about the task or scenario you have in mind, so I know how best to approach it?",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 8.8,
+      "firstAudioMs": 1633,
+      "bytes": 422400,
+      "status": "ready"
+    },
+    {
+      "voice": "marin",
+      "language": "ru",
+      "file": "/audio/voice-comparison/marin-ru.wav",
+      "transcript": "Привет, Нави! Звучит интересно. Расскажи, какую задачу ты имеешь в виду, и я поделюсь своим подходом.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 7.15,
+      "firstAudioMs": 1709,
+      "bytes": 343200,
+      "status": "ready"
+    },
+    {
+      "voice": "cedar",
+      "language": "ru",
+      "file": "/audio/voice-comparison/cedar-ru.wav",
+      "transcript": "Привет, Нави! Рад познакомиться. Расскажи подробнее, что за задача, и я с удовольствием поделюсь своим подходом.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 6.35,
+      "firstAudioMs": 1772,
+      "bytes": 304800,
+      "status": "ready"
+    },
+    {
+      "voice": "cedar",
+      "language": "en",
+      "file": "/audio/voice-comparison/cedar-en.wav",
+      "transcript": "Sure thing, Navi. I’ll share my perspective honestly, and we can explore different approaches together. What’s the task you’d like to dive into?",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 7.35,
+      "firstAudioMs": 1622,
+      "bytes": 352800,
+      "status": "ready"
+    },
+    {
+      "voice": "alloy",
+      "language": "ru",
+      "file": "/audio/voice-comparison/alloy-ru.wav",
+      "transcript": "Привет, Нави! Звучит как исследование творческого подхода. Можешь рассказать о задаче или ситуации, о которой идёт речь, чтобы я мог предложить свой вариант?",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 9.85,
+      "firstAudioMs": 1989,
+      "bytes": 472800,
+      "status": "ready"
+    },
+    {
+      "voice": "ash",
+      "language": "ru",
+      "file": "/audio/voice-comparison/ash-ru.wav",
+      "transcript": "Привет, Нави! Рад знакомству. Можешь рассказать немного подробнее о задаче, о которой идёт речь? Я постараюсь поделиться своим подходом, а ты сможешь сравнить с собственным.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 11.7,
+      "firstAudioMs": 1782,
+      "bytes": 561600,
+      "status": "ready"
+    },
+    {
+      "voice": "ballad",
+      "language": "ru",
+      "file": "/audio/voice-comparison/ballad-ru.wav",
+      "transcript": "Привет, Нави! Здорово, что можно просто поделиться подходом. Опиши задачу или ситуацию, и я расскажу, как бы я к ней подошёл, а потом посмотрим, какие ещё идеи могут возникнуть.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 12.1,
+      "firstAudioMs": 1663,
+      "bytes": 580800,
+      "status": "ready"
+    },
+    {
+      "voice": "coral",
+      "language": "en",
+      "file": "/audio/voice-comparison/coral-en.wav",
+      "transcript": "Hi Navi, sounds like an interesting exercise! I’m ready whenever you are—just let me know what the task is, and I’ll walk you through how I’d handle it.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 8.7,
+      "firstAudioMs": 1697,
+      "bytes": 417600,
+      "status": "ready"
+    },
+    {
+      "voice": "echo",
+      "language": "ru",
+      "file": "/audio/voice-comparison/echo-ru.wav",
+      "transcript": "Привет, Нави. Рад знакомству. Давай попробуем вместе. Можешь рассказать, о какой задаче идёт речь, и как ты обычно к ней подходишь? Тогда я предложу свой вариант.",
+      "text": "Привет! Я Нави. Здесь нет правильных ответов — просто выберите, как вы подошли бы к задаче. Интересно, что получится.",
+      "seconds": 11.1,
+      "firstAudioMs": 2015,
+      "bytes": 532800,
+      "status": "ready"
+    },
+    {
+      "voice": "echo",
+      "language": "en",
+      "file": "/audio/voice-comparison/echo-en.wav",
+      "transcript": "Hi Navi, nice to meet you! I'm here to help however I can. Could you tell me a bit more about the task you're thinking of, so I can approach it in a way that feels right for you?",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 10.1,
+      "firstAudioMs": 1653,
+      "bytes": 484800,
+      "status": "ready"
+    },
+    {
+      "voice": "sage",
+      "language": "en",
+      "file": "/audio/voice-comparison/sage-en.wav",
+      "transcript": "Hey Navi, great to meet you! I’m happy to walk through whatever task you have in mind and share how I’d approach it. Just let me know what you’d like to explore, and we can dive in together.",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 10.3,
+      "firstAudioMs": 1750,
+      "bytes": 494400,
+      "status": "ready"
+    },
+    {
+      "voice": "marin",
+      "language": "en",
+      "file": "/audio/voice-comparison/marin-en.wav",
+      "transcript": "Hi Navi, nice to meet you! I’m up for exploring different approaches with you. What task are we diving into today?",
+      "text": "Hi, I’m Navi. There are no right answers here — just choose how you would approach the task. Let’s see what comes up.",
+      "seconds": 6.05,
+      "firstAudioMs": 1853,
+      "bytes": 290400,
+      "status": "ready"
+    }
+  ],
+  "incompleteFirstAttempts": [
+    {
+      "voice": "alloy",
+      "language": "ru",
+      "status": "error",
+      "error": "incomplete"
+    },
+    {
+      "voice": "ash",
+      "language": "ru",
+      "status": "error",
+      "error": "incomplete"
+    },
+    {
+      "voice": "ballad",
+      "language": "ru",
+      "status": "error",
+      "error": "incomplete"
+    },
+    {
+      "voice": "coral",
+      "language": "en",
+      "status": "error",
+      "error": "incomplete"
+    },
+    {
+      "voice": "echo",
+      "language": "ru",
+      "status": "error",
+      "error": "incomplete"
+    },
+    {
+      "voice": "echo",
+      "language": "en",
+      "status": "error",
+      "error": "incomplete"
+    },
+    {
+      "voice": "sage",
+      "language": "en",
+      "status": "error",
+      "error": "incomplete"
+    },
+    {
+      "voice": "marin",
+      "language": "en",
+      "status": "error",
+      "error": "incomplete"
+    }
+  ]
+}

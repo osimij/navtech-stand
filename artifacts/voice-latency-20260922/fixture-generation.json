@@ -1,0 +1,22 @@
+{
+  "purpose": "Synthetic RU/EN microphone fixture generation; one provider connection, two outputs",
+  "model": "gpt-realtime-2.1",
+  "voice": "marin",
+  "phrases": [
+    {
+      "language": "ru",
+      "requested": "Подскажите, пожалуйста, сколько откликов в этом примере ждут уточнения доступности для интервью?",
+      "transcript": "Подскажите, пожалуйста, сколько откликов в этом примере ждут уточнения доступности для интервью?",
+      "seconds": 6.25,
+      "status": "completed"
+    },
+    {
+      "language": "en",
+      "requested": "Could you tell me, in this example, how many applications are still waiting for availability clarification?",
+      "transcript": "Could you tell me, in this example, how many applications are still waiting for availability clarification?",
+      "seconds": 6.95,
+      "status": "completed"
+    }
+  ],
+  "closed": true
+}

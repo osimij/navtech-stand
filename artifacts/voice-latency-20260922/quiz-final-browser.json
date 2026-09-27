@@ -1,0 +1,659 @@
+[
+  {
+    "event": "explicit.start",
+    "ms": 0.1,
+    "test": "cold",
+    "kind": "quiz",
+    "wallClock": "2026-09-22T04:20:48.188Z"
+  },
+  {
+    "event": "state",
+    "ms": 1.2,
+    "test": "cold",
+    "phase": "connecting"
+  },
+  {
+    "event": "transport.pcm",
+    "ms": 1.2,
+    "test": "cold"
+  },
+  {
+    "event": "synthetic.microphone",
+    "ms": 18.4,
+    "test": "cold"
+  },
+  {
+    "event": "microphone.ready",
+    "ms": 18.4,
+    "test": "cold"
+  },
+  {
+    "event": "channel.open",
+    "ms": 20.1,
+    "test": "cold"
+  },
+  {
+    "event": "session.started",
+    "ms": 1368.1,
+    "test": "cold",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "state",
+    "ms": 1368.4,
+    "test": "cold",
+    "phase": "ready"
+  },
+  {
+    "event": "session.started",
+    "ms": 1368.5,
+    "test": "cold"
+  },
+  {
+    "event": "response.requested",
+    "ms": 1371.7,
+    "test": "cold",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "response.requested",
+    "ms": 1372,
+    "test": "cold"
+  },
+  {
+    "event": "response.started",
+    "ms": 1687,
+    "test": "cold"
+  },
+  {
+    "event": "response.started",
+    "ms": 1687.3,
+    "test": "cold"
+  },
+  {
+    "event": "first.packet",
+    "ms": 2420.4,
+    "test": "cold"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 733,
+    "test": "cold"
+  },
+  {
+    "event": "audio.pcm_received",
+    "ms": 2422.5,
+    "test": "cold",
+    "bytes": 19200
+  },
+  {
+    "event": "playback",
+    "ms": 2425.2,
+    "test": "cold",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 766,
+    "test": "cold"
+  },
+  {
+    "event": "audio.signal",
+    "ms": 2453.8,
+    "test": "cold",
+    "level": 0.030033806742284654
+  },
+  {
+    "event": "first.played",
+    "ms": 2453.9,
+    "test": "cold",
+    "level": 0.21023664719599258,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 2765,
+    "test": "cold",
+    "status": "completed",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "playback",
+    "ms": 5376.6,
+    "test": "cold",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 5377.1,
+    "test": "cold",
+    "caption": "Привет! Я Нави. С чего начнём?"
+  },
+  {
+    "event": "context.change",
+    "ms": 5377.4,
+    "test": "quiz_0"
+  },
+  {
+    "event": "game.context",
+    "ms": 5377.6,
+    "test": "quiz_0",
+    "phase": "quiz"
+  },
+  {
+    "event": "response.requested",
+    "ms": 5729.4,
+    "test": "quiz_0",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "response.requested",
+    "ms": 5730,
+    "test": "quiz_0"
+  },
+  {
+    "event": "response.started",
+    "ms": 6002.7,
+    "test": "quiz_0"
+  },
+  {
+    "event": "response.started",
+    "ms": 6003.2,
+    "test": "quiz_0"
+  },
+  {
+    "event": "first.packet",
+    "ms": 6744.3,
+    "test": "quiz_0"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 741,
+    "test": "quiz_0"
+  },
+  {
+    "event": "playback",
+    "ms": 6753.3,
+    "test": "quiz_0",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 983,
+    "test": "quiz_0"
+  },
+  {
+    "event": "first.played",
+    "ms": 6987.3,
+    "test": "quiz_0",
+    "level": 0.580296805783784,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 7303.8,
+    "test": "quiz_0",
+    "status": "completed",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "playback",
+    "ms": 11147,
+    "test": "quiz_0",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 11147.5,
+    "test": "quiz_0",
+    "caption": "Если не хочется угадывать, начните с того, что вам понятнее всего."
+  },
+  {
+    "event": "context.change",
+    "ms": 11147.5,
+    "test": "quiz_1"
+  },
+  {
+    "event": "game.context",
+    "ms": 11147.7,
+    "test": "quiz_1",
+    "phase": "quiz"
+  },
+  {
+    "event": "response.requested",
+    "ms": 11498.5,
+    "test": "quiz_1",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "response.requested",
+    "ms": 11498.7,
+    "test": "quiz_1"
+  },
+  {
+    "event": "response.started",
+    "ms": 11754.4,
+    "test": "quiz_1"
+  },
+  {
+    "event": "response.started",
+    "ms": 11754.7,
+    "test": "quiz_1"
+  },
+  {
+    "event": "first.packet",
+    "ms": 12943.5,
+    "test": "quiz_1"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 1189,
+    "test": "quiz_1"
+  },
+  {
+    "event": "playback",
+    "ms": 12947.3,
+    "test": "quiz_1",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 1259,
+    "test": "quiz_1"
+  },
+  {
+    "event": "first.played",
+    "ms": 13013.9,
+    "test": "quiz_1",
+    "level": 0.5117999351173685,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 13654.7,
+    "test": "quiz_1",
+    "status": "completed",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "playback",
+    "ms": 17445.6,
+    "test": "quiz_1",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 17446.1,
+    "test": "quiz_1",
+    "caption": "Если не хочется угадывать, начните с того, что вам понятнее всего."
+  },
+  {
+    "event": "context.change",
+    "ms": 17446.2,
+    "test": "quiz_2"
+  },
+  {
+    "event": "game.context",
+    "ms": 17446.3,
+    "test": "quiz_2",
+    "phase": "quiz"
+  },
+  {
+    "event": "response.requested",
+    "ms": 17798.3,
+    "test": "quiz_2",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "response.requested",
+    "ms": 17798.7,
+    "test": "quiz_2"
+  },
+  {
+    "event": "response.started",
+    "ms": 18062.4,
+    "test": "quiz_2"
+  },
+  {
+    "event": "response.started",
+    "ms": 18063.1,
+    "test": "quiz_2"
+  },
+  {
+    "event": "first.packet",
+    "ms": 19007.8,
+    "test": "quiz_2"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 945,
+    "test": "quiz_2"
+  },
+  {
+    "event": "playback",
+    "ms": 19018.3,
+    "test": "quiz_2",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 977,
+    "test": "quiz_2"
+  },
+  {
+    "event": "first.played",
+    "ms": 19040.4,
+    "test": "quiz_2",
+    "level": 0.45199579026630904,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 19547.2,
+    "test": "quiz_2",
+    "status": "completed",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "playback",
+    "ms": 23312.1,
+    "test": "quiz_2",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 23312.5,
+    "test": "quiz_2",
+    "caption": "Можно начать с данных, чтобы риск был понятнее до дальнейших шагов."
+  },
+  {
+    "event": "context.change",
+    "ms": 23312.5,
+    "test": "quiz_3"
+  },
+  {
+    "event": "game.context",
+    "ms": 23312.6,
+    "test": "quiz_3",
+    "phase": "quiz"
+  },
+  {
+    "event": "response.requested",
+    "ms": 23663.5,
+    "test": "quiz_3",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "response.requested",
+    "ms": 23664,
+    "test": "quiz_3"
+  },
+  {
+    "event": "response.started",
+    "ms": 23919.1,
+    "test": "quiz_3"
+  },
+  {
+    "event": "response.started",
+    "ms": 23919.6,
+    "test": "quiz_3"
+  },
+  {
+    "event": "first.packet",
+    "ms": 24819.3,
+    "test": "quiz_3"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 900,
+    "test": "quiz_3"
+  },
+  {
+    "event": "playback",
+    "ms": 24830.7,
+    "test": "quiz_3",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 934,
+    "test": "quiz_3"
+  },
+  {
+    "event": "first.played",
+    "ms": 24853.8,
+    "test": "quiz_3",
+    "level": 0.09033427912260755,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 25690.4,
+    "test": "quiz_3",
+    "status": "completed",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "playback",
+    "ms": 30773.9,
+    "test": "quiz_3",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 30774.3,
+    "test": "quiz_3",
+    "caption": "Если вы уже выбрали данные, теперь подумайте, какой результат будет самым приятным."
+  },
+  {
+    "event": "context.change",
+    "ms": 30774.5,
+    "test": "quiz_4"
+  },
+  {
+    "event": "game.context",
+    "ms": 30774.7,
+    "test": "quiz_4",
+    "phase": "quiz"
+  },
+  {
+    "event": "response.requested",
+    "ms": 31126,
+    "test": "quiz_4",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "response.requested",
+    "ms": 31126.5,
+    "test": "quiz_4"
+  },
+  {
+    "event": "response.started",
+    "ms": 31379.3,
+    "test": "quiz_4"
+  },
+  {
+    "event": "response.started",
+    "ms": 31379.6,
+    "test": "quiz_4"
+  },
+  {
+    "event": "first.packet",
+    "ms": 32479.1,
+    "test": "quiz_4"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 1099,
+    "test": "quiz_4"
+  },
+  {
+    "event": "playback",
+    "ms": 32487.2,
+    "test": "quiz_4",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 1154,
+    "test": "quiz_4"
+  },
+  {
+    "event": "first.played",
+    "ms": 32533.8,
+    "test": "quiz_4",
+    "level": 0.4816160402869576,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 34698.2,
+    "test": "quiz_4",
+    "status": "completed",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "playback",
+    "ms": 38533.5,
+    "test": "quiz_4",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 38533.8,
+    "test": "quiz_4",
+    "caption": "Раз закономерность прояснилась, выберите шаг, который лучше всего закрепит этот прогресс."
+  },
+  {
+    "event": "context.change",
+    "ms": 38534,
+    "test": "quiz_result"
+  },
+  {
+    "event": "game.context",
+    "ms": 38534,
+    "test": "quiz_result",
+    "phase": "result"
+  },
+  {
+    "event": "response.requested",
+    "ms": 38884.3,
+    "test": "quiz_result",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "response.requested",
+    "ms": 38884.7,
+    "test": "quiz_result"
+  },
+  {
+    "event": "response.started",
+    "ms": 39137.5,
+    "test": "quiz_result"
+  },
+  {
+    "event": "response.started",
+    "ms": 39137.8,
+    "test": "quiz_result"
+  },
+  {
+    "event": "first.packet",
+    "ms": 40443.5,
+    "test": "quiz_result"
+  },
+  {
+    "event": "response.first_packet",
+    "ms": 1306,
+    "test": "quiz_result"
+  },
+  {
+    "event": "playback",
+    "ms": 40447.8,
+    "test": "quiz_result",
+    "busy": true
+  },
+  {
+    "event": "response.first_played",
+    "ms": 1822,
+    "test": "quiz_result"
+  },
+  {
+    "event": "first.played",
+    "ms": 40960.3,
+    "test": "quiz_result",
+    "level": 0.11460629466755769,
+    "audioContext": "running",
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.024
+  },
+  {
+    "event": "response.done",
+    "ms": 41440.2,
+    "test": "quiz_result",
+    "status": "completed",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "playback",
+    "ms": 46144.3,
+    "test": "quiz_result",
+    "busy": false
+  },
+  {
+    "event": "turn.finished",
+    "ms": 46144.9,
+    "test": "quiz_result",
+    "caption": "Можете взглянуть на Prism, чтобы увидеть сводные данные стенда и продолжить разговор."
+  },
+  {
+    "event": "stop",
+    "ms": 46145.3,
+    "test": "quiz_result",
+    "code": "manual"
+  },
+  {
+    "event": "state",
+    "ms": 46145.9,
+    "test": "quiz_result",
+    "phase": "closing"
+  },
+  {
+    "event": "stop.requested",
+    "ms": 46146.2,
+    "test": "quiz_result"
+  },
+  {
+    "event": "rehearsal.complete",
+    "ms": 46146.3,
+    "test": "quiz_result"
+  },
+  {
+    "event": "session.closed",
+    "ms": 46156.3,
+    "test": "quiz_result",
+    "lastInputSignalMs": 0
+  },
+  {
+    "event": "state",
+    "ms": 46157.2,
+    "test": "quiz_result",
+    "phase": "idle"
+  },
+  {
+    "event": "socket.closed",
+    "ms": 46159.5,
+    "test": "quiz_result"
+  }
+]

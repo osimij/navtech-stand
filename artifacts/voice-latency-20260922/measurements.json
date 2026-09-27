@@ -1,0 +1,280 @@
+{
+  "before-ru-browser": {
+    "cold": {
+      "total_ms": 2188.9,
+      "first_played_ms": 2188.9,
+      "created_to_packet_ms": 519.4,
+      "packet_to_played_ms": 49.2
+    },
+    "spoken_1": {
+      "total_ms": 1759.8,
+      "first_played_ms": 12748.6,
+      "last_input_signal_ms": 10988.8,
+      "file_ended_ms": 11383.6,
+      "vad_wait_ms": 953.5,
+      "premature_audio": false,
+      "created_to_packet_ms": 672.9,
+      "packet_to_played_ms": 124.9
+    },
+    "spoken_2": {
+      "total_ms": 1812.9,
+      "first_played_ms": 24748.7,
+      "last_input_signal_ms": 22935.8,
+      "file_ended_ms": 23314.1,
+      "vad_wait_ms": 961.6,
+      "premature_audio": false,
+      "created_to_packet_ms": 782.6,
+      "packet_to_played_ms": 64.6
+    },
+    "help": {
+      "total_ms": 1823.2,
+      "first_played_ms": 30508.8,
+      "created_to_packet_ms": 781.5,
+      "packet_to_played_ms": 58.4
+    },
+    "barge": {
+      "total_ms": 1813.3,
+      "first_played_ms": 38615.4,
+      "last_input_signal_ms": 36802.1,
+      "file_ended_ms": 37202.1,
+      "vad_wait_ms": 995.2,
+      "premature_audio": false,
+      "created_to_packet_ms": 722.7,
+      "packet_to_played_ms": 93.4
+    },
+    "context": {
+      "total_ms": 3477.9,
+      "first_played_ms": 42295.3,
+      "created_to_packet_ms": 797.4,
+      "packet_to_played_ms": 38.0
+    },
+    "complete": true,
+    "socket_closed": true
+  },
+  "after-ru-semantic-browser": {
+    "cold": {
+      "total_ms": 2667.1,
+      "first_played_ms": 2667.2,
+      "created_to_packet_ms": 584.8,
+      "packet_to_played_ms": 61.9
+    },
+    "spoken_1": {
+      "total_ms": 2452.8,
+      "first_played_ms": 13866.8,
+      "last_input_signal_ms": 11414,
+      "file_ended_ms": 11803,
+      "vad_wait_ms": 1425.6,
+      "premature_audio": false,
+      "created_to_packet_ms": 965.4,
+      "packet_to_played_ms": 55.3
+    },
+    "spoken_2": {
+      "total_ms": 1813.5,
+      "first_played_ms": 25653.6,
+      "last_input_signal_ms": 23840.1,
+      "file_ended_ms": 24256.7,
+      "vad_wait_ms": 989.3,
+      "premature_audio": false,
+      "created_to_packet_ms": 654.7,
+      "packet_to_played_ms": 162.9
+    },
+    "help": {
+      "total_ms": 1295.3,
+      "first_played_ms": 31040.4,
+      "created_to_packet_ms": 895.5,
+      "packet_to_played_ms": 80.5
+    },
+    "barge": {
+      "total_ms": 1813.0,
+      "first_played_ms": 39146.9,
+      "last_input_signal_ms": 37333.9,
+      "file_ended_ms": 37728.2,
+      "vad_wait_ms": 967.5,
+      "premature_audio": false,
+      "created_to_packet_ms": 787.6,
+      "packet_to_played_ms": 50.4
+    },
+    "context": {
+      "total_ms": 3742.2,
+      "first_played_ms": 43093.6,
+      "created_to_packet_ms": 752.1,
+      "packet_to_played_ms": 73.7
+    },
+    "complete": true,
+    "socket_closed": true
+  },
+  "after-ru-server900-intermediate": {
+    "cold": {
+      "total_ms": 5281.7,
+      "first_played_ms": 5281.7,
+      "trigger_to_request_ms": 4228.3,
+      "request_to_created_ms": 255.8,
+      "created_to_packet_ms": 732.4,
+      "packet_to_played_ms": 65.2
+    },
+    "spoken_1": {
+      "total_ms": 2880.4,
+      "first_played_ms": 16695.4,
+      "last_input_signal_ms": 13815,
+      "file_ended_ms": 14209.7,
+      "vad_wait_ms": 1528.9,
+      "premature_audio": false,
+      "created_to_packet_ms": 947.6,
+      "packet_to_played_ms": 397.1
+    },
+    "spoken_2": {
+      "total_ms": 2560.0,
+      "first_played_ms": 28961.7,
+      "last_input_signal_ms": 26401.7,
+      "file_ended_ms": 26790.9,
+      "vad_wait_ms": 1397.5,
+      "premature_audio": true,
+      "created_to_packet_ms": 1070.1,
+      "packet_to_played_ms": 86.3
+    },
+    "help": {
+      "total_ms": 1151.6,
+      "first_played_ms": 34028.5,
+      "trigger_to_request_ms": 4.8,
+      "request_to_created_ms": 289.2,
+      "created_to_packet_ms": 802.7,
+      "packet_to_played_ms": 54.9
+    },
+    "barge": {
+      "total_ms": 2293.6,
+      "first_played_ms": 42615.2,
+      "last_input_signal_ms": 40321.6,
+      "file_ended_ms": 40721.5,
+      "vad_wait_ms": 1379.5,
+      "premature_audio": false,
+      "created_to_packet_ms": 851.1,
+      "packet_to_played_ms": 53.8
+    },
+    "context": {
+      "total_ms": 1557.1,
+      "first_played_ms": 44375.2,
+      "trigger_to_request_ms": 647.0,
+      "request_to_created_ms": 321.9,
+      "created_to_packet_ms": 529.1,
+      "packet_to_played_ms": 59.1
+    },
+    "complete": true,
+    "socket_closed": true
+  },
+  "after-ru-browser": {
+    "cold": {
+      "total_ms": 3094.2,
+      "first_played_ms": 3094.3,
+      "trigger_to_request_ms": 1970.2,
+      "request_to_created_ms": 273.4,
+      "created_to_packet_ms": 775.2,
+      "packet_to_played_ms": 75.4
+    },
+    "spoken_1": {
+      "total_ms": 1867.3,
+      "first_played_ms": 13974.8,
+      "last_input_signal_ms": 12107.5,
+      "file_ended_ms": 12512.8,
+      "vad_wait_ms": 981.3,
+      "premature_audio": false,
+      "created_to_packet_ms": 836.3,
+      "packet_to_played_ms": 42.8
+    },
+    "spoken_2": {
+      "total_ms": 1920.1,
+      "first_played_ms": 26240.8,
+      "last_input_signal_ms": 24320.7,
+      "file_ended_ms": 24726,
+      "vad_wait_ms": 959.7,
+      "premature_audio": false,
+      "created_to_packet_ms": 888.6,
+      "packet_to_played_ms": 62.9
+    },
+    "help": {
+      "total_ms": 1135.4,
+      "first_played_ms": 31414.6,
+      "trigger_to_request_ms": 8.4,
+      "request_to_created_ms": 292.9,
+      "created_to_packet_ms": 754.0,
+      "packet_to_played_ms": 80.1
+    },
+    "barge": {
+      "total_ms": 2880.1,
+      "first_played_ms": 40587.6,
+      "last_input_signal_ms": 37707.5,
+      "file_ended_ms": 38107.5,
+      "vad_wait_ms": 2011.4,
+      "premature_audio": false,
+      "created_to_packet_ms": 827.5,
+      "packet_to_played_ms": 39.5
+    },
+    "context": {
+      "total_ms": 1607.7,
+      "first_played_ms": 42401,
+      "trigger_to_request_ms": 578.3,
+      "request_to_created_ms": 269.3,
+      "created_to_packet_ms": 702.7,
+      "packet_to_played_ms": 57.4
+    },
+    "complete": true,
+    "socket_closed": true
+  },
+  "after-en-browser": {
+    "cold": {
+      "total_ms": 2668.3,
+      "first_played_ms": 2668.3,
+      "trigger_to_request_ms": 1459.8,
+      "request_to_created_ms": 260.5,
+      "created_to_packet_ms": 904.7,
+      "packet_to_played_ms": 43.3
+    },
+    "spoken_1": {
+      "total_ms": 3306.4,
+      "first_played_ms": 16001.6,
+      "last_input_signal_ms": 12695.2,
+      "file_ended_ms": 13062.8,
+      "vad_wait_ms": 2442.9,
+      "premature_audio": false,
+      "created_to_packet_ms": 778.4,
+      "packet_to_played_ms": 79.7
+    },
+    "spoken_2": {
+      "total_ms": 3146.6,
+      "first_played_ms": 30134.9,
+      "last_input_signal_ms": 26988.3,
+      "file_ended_ms": 27356.6,
+      "vad_wait_ms": 2188.0,
+      "premature_audio": false,
+      "created_to_packet_ms": 890.3,
+      "packet_to_played_ms": 66.7
+    },
+    "help": {
+      "total_ms": 1145.7,
+      "first_played_ms": 35521.6,
+      "trigger_to_request_ms": 7.4,
+      "request_to_created_ms": 329.7,
+      "created_to_packet_ms": 754.3,
+      "packet_to_played_ms": 54.3
+    },
+    "barge": {
+      "total_ms": 2240.4,
+      "first_played_ms": 44641.9,
+      "last_input_signal_ms": 42401.5,
+      "file_ended_ms": 42759.2,
+      "vad_wait_ms": 1263.2,
+      "premature_audio": false,
+      "created_to_packet_ms": 928.0,
+      "packet_to_played_ms": 40.3
+    },
+    "context": {
+      "total_ms": 1611.7,
+      "first_played_ms": 46455.1,
+      "trigger_to_request_ms": 700.9,
+      "request_to_created_ms": 263.2,
+      "created_to_packet_ms": 565.0,
+      "packet_to_played_ms": 82.6
+    },
+    "complete": true,
+    "socket_closed": true
+  }
+}

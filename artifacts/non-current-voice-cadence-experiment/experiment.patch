@@ -1,0 +1,192 @@
+--- a/lib/live-game.ts
++++ b/lib/live-game.ts
+@@ -32,5 +32,10 @@
+     if (game.phase === 'contact') return { speak: changedScreen, text: prefix + `Optional demo/contact form; topic: ${catalog.interestLabels[game.interest] || 'not chosen'}. ${changedScreen ? 'The visitor may leave a contact on screen if they want the team to follow up. Leave them quiet space.' : 'Topic updated. No announcement needed.'} No form values are shared with you. Never request or read out personal contact information. Do not claim it is saved yet. Answer questions when asked.` };
+     return { speak: changedScreen, text: prefix + 'The request was successfully saved. If the conversation has paused, thank them briefly, then listen quietly. Do not promise a date or claim that a message was sent. The next participant starts a new conversation.' };
+   }
+-  return { parse, cue };
++  function turn(game: GameContext) {
++    if (game.phase === 'quiz') return 'Accompany the CURRENT question now, in the conversation language. In one short conversational question (at most 12 words), invite the next choice. Let the previous choice inform the phrasing without recapping it. Use everyday spoken language and the actual current question, not generic praise or an offer of help. Avoid repeated formulas like "you already chose" or "now choose". Do not read the options, repeat a greeting, decide for them, or answer an earlier spoken question. Then listen.';
++    if (game.phase === 'result') return 'The visitor has finished the five choices. In at most 18 words, name their actual direction in everyday language and invite them to the relevant product demo. Preserve ties. No greeting, technical jargon, unsolicited assessment disclaimer or repeated question. Then listen.';
++    return 'The request is saved. Thank the visitor in one short sentence in the current conversation language, then listen. Do not promise a date.';
++  }
++  return { parse, cue, turn };
+ }
+--- a/lib/live-relay.ts
++++ b/lib/live-relay.ts
+@@ -42,14 +42,18 @@
+   function schedule() {
+     clearTimeout(idleTimer);
+     if (!started || closing || (!pendingAction && !pendingScreen)) return;
++    // The quiz should follow a touch promptly, without adding a second thinking pause
++    // after playback. Still wait for speech and the actual playback queue to finish.
++    const quietMs = demo ? 1800 : 350;
++    const delay = pendingAction ? 0 : Math.max(120, quietMs - (Date.now() - lastConversation));
+     idleTimer = setTimeout(() => {
+       if (responseId || speaking || playback) return; // Resume from the event that ends speech/playback.
+       if (pendingAction) { const action = pendingAction; pendingAction = ''; respond(action); return; }
+-      if (pendingScreen && !creativeMode && Date.now() - lastConversation >= 1800) {
++      if (pendingScreen && !creativeMode && Date.now() - lastConversation >= quietMs) {
+         pendingScreen = false;
+-        respond('The visitor has moved to the latest screen and there is a conversational pause. Say at most 12 words: one relevant observation or offer of help about the CURRENT screen, in the current conversation language. Do not re-answer an earlier spoken question. No greeting, no list of choices, no sales pitch. Then listen.', false);
++        respond(game && guide ? guide.turn(game) : 'The visitor has moved to the latest screen and there is a conversational pause. Say at most 12 words: one relevant observation or offer of help about the CURRENT screen, in the current conversation language. Do not re-answer an earlier spoken question. No greeting, no list of choices, no sales pitch. Then listen.', false);
+       } else if (pendingScreen && !creativeMode) schedule();
+-    }, 650);
++    }, delay);
+   }
+   function interrupt(reason = 'speech') {
+     pendingScreen = false; pendingAction = ''; playback = false;
+@@ -80,8 +84,8 @@
+         if (data.type === 'session.updated' && !started) {
+           started = true; clearTimeout(connectTimer); limit = setTimeout(close, 600000);
+           sendClient({ type: 'session.started' });
+-          if (!pendingAction) pendingAction = demo ? `The visitor enabled voice. Say ONLY this short opening, then listen: ${{ru:'Привет! Что разберём в этом примере?',en:'Hi! What shall we explore in this example?',tg:'Салом! Кадом қисми мисолро дида мебароем?'}[language]}` : game && game.phase !== 'welcome' ? 'The visitor tapped Navi during the game. Briefly offer help with the current screen, in the current conversation language. Do not restart the introduction.' : `The visitor tapped Navi to begin a conversation. Say only this short opening, then listen: ${{ru:'Привет! Я Нави. С чего начнём?',en:'Hi! I’m Navi. What shall we try?',tg:'Салом! Ман Нави. Бо чӣ оғоз мекунем?'}[language]}`;
+-          const action = pendingAction; pendingAction = ''; respond(action,!demo); return;
++          if (!pendingAction) pendingAction = demo ? `The visitor enabled voice. Say ONLY this short opening, then listen: ${{ru:'Привет! Что разберём в этом примере?',en:'Hi! What shall we explore in this example?',tg:'Салом! Кадом қисми мисолро дида мебароем?'}[language]}` : game && game.phase !== 'welcome' ? `The visitor tapped Navi during the game. ${game.phase === 'quiz' || game.phase === 'result' ? guide?.turn(game) : 'Briefly offer help with the current screen, then listen.'} Do not restart the introduction.` : `The visitor tapped Navi to begin a conversation. Say only this short opening, then listen: ${{ru:'Привет! Я Нави. С чего начнём?',en:'Hi! I’m Navi. What shall we try?',tg:'Салом! Ман Нави. Бо чӣ оғоз мекунем?'}[language]}`;
++          const action = pendingAction; pendingAction = ''; pendingScreen = false; respond(action,!demo); return;
+         }
+         if (data.type === 'response.created') {
+           const assigned = responseId==='pending'?pendingDemo:demo;
+--- a/lib/live-pcm-client.ts
++++ b/lib/live-pcm-client.ts
+@@ -22,6 +22,7 @@
+   ready: boolean; closing: boolean; error: string; abort: AbortController;
+   timer?: ReturnType<typeof setTimeout>; closeTimer?: ReturnType<typeof setTimeout>;
+   caption: string; captionAt: number; heard: boolean; received: boolean; inputHeard: boolean; playing:boolean;
++  responseAt?: number; responseReceived?: boolean; responseHeard?: boolean;
+ };
+ export function createLiveVoice(callbacks: {
+   onState?: (state: LiveState) => void;
+@@ -85,10 +86,12 @@
+       r.timer = setTimeout(() => stop('Подключение заняло слишком много времени.', 'timeout'), 30000);
+       await context.resume(); if (run !== r || r.closing) return;
+       if (context.sampleRate !== 24000) throw Error('Браузер не поддерживает нужную частоту звука.');
+-      const ready = await environment.fetch('/api/live', { signal: r.abort.signal });
++      const [ready] = await Promise.all([
++        environment.fetch('/api/live', { signal: r.abort.signal }),
++        context.audioWorklet.addModule('/audio/live-pcm-worklet.js'),
++      ]);
+       if (!ready.ok || !(await ready.json() as { configured?: boolean }).configured) throw Error('Голос не настроен. Проверьте локальный ключ OpenAI.');
+       if (run !== r || r.closing) return;
+-      await context.audioWorklet.addModule('/audio/live-pcm-worklet.js'); if (run !== r || r.closing) return;
+       const mic = await environment.microphone();
+       if (run !== r || r.closing) { mic.getTracks().forEach(track => track.stop()); return; }
+       r.mic = mic; log('microphone.ready');
+@@ -112,6 +115,7 @@
+           current.socket.send(JSON.stringify({ type: 'truncate', item_id: data.item_id, content_index: data.content_index, audio_end_ms: data.audio_end_ms }));
+         } else if (data.type === 'playback' && current.socket?.readyState === 1) {
+           current.playing=Boolean(data.busy);
++          log('audio.playback', { enabled: current.playing });
+           current.socket.send(JSON.stringify({ type: 'playback', busy: data.busy }));
+         } else if (data.type === 'overflow') {
+           stop('Нави говорил слишком долго. Начните разговор снова.', 'output_overflow');
+@@ -120,6 +124,7 @@
+           if ((data.inputLevel || 0) > .02) callbacks.onActivity?.();
+           if ((data.inputLevel || 0) > .009 && !current.inputHeard) { current.inputHeard = true; log('microphone.signal', { level: data.inputLevel || 0 }); }
+           if (level > .009 && !current.heard) { current.heard = true; log('audio.signal', { level }); }
++          if (level > .009 && !current.responseHeard) { current.responseHeard = true; log('response.audible', { ms: Date.now() - (current.responseAt || Date.now()) }); }
+           if (!disposed) callbacks.onSpeech?.({ speaking: level > .009, level: Math.min(1, level * 7) });
+         }
+       };
+@@ -144,10 +149,16 @@
+           node.port.postMessage({ type: 'interrupt', item_id: event.item_id, content_index: event.content_index });
+           current.caption = ''; current.captionAt = 0; callbacks.onCaption?.(''); silence();
+         } else if (event.type === 'response.started') {
++          current.responseAt = Date.now(); current.responseReceived = false; current.responseHeard = false;
++          log('response.started');
+           current.caption = ''; current.captionAt = 0; callbacks.onCaption?.('');
+         } else if (event.type === 'input.speech_started') {
++          log('input.speech_started');
+           callbacks.onActivity?.();
++        } else if (event.type === 'input.speech_stopped') {
++          log('input.speech_stopped');
+         } else if (event.type === 'session.output_audio.delta' && event.delta) {
++          if (!current.responseReceived) { current.responseReceived = true; log('response.first_audio', { ms: Date.now() - (current.responseAt || Date.now()) }); }
+           const binary = atob(event.delta), bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+           if (!current.received) { current.received = true; log('audio.pcm_received', { bytes: bytes.length }); }
+           node.port.postMessage({ type: 'audio', buffer: bytes.buffer, item_id: event.item_id, content_index: event.content_index }, [bytes.buffer]);
+--- a/lib/live-diagnostics.ts
++++ b/lib/live-diagnostics.ts
+@@ -1,5 +1,5 @@
+ // Local, bounded diagnostic metadata only. Never accept audio, SDP, keys or transcripts.
+-const fields = new Set(['phase','code','event','context','connection','ice','channel','track','enabled','muted','packets','bytes','level','status']);
++const fields = new Set(['phase','code','event','context','connection','ice','channel','track','enabled','muted','packets','bytes','level','status','ms']);
+ const entries: { at: string; event: string; details: Record<string, string | number | boolean> }[] = [];
+ export async function liveDiagnostics(request: Request) {
+   const url = new URL(request.url);
+--- a/tests/live-game.test.mjs
++++ b/tests/live-game.test.mjs
+@@ -35,6 +35,62 @@
+   close() { if (this.readyState === 3) return; this.readyState = 3; this.emit('close'); }
+   message(event) { this.emit('message', Buffer.from(JSON.stringify(event)), false); }
+ }
++test('every quiz screen gets a timely spoken turn on the same connection, after actual playback', t => {
++  t.mock.timers.enable({apis:['setTimeout','Date']});
++  const c = new Socket(), p = new Socket(); let connections = 0;
++  relayLive(c, () => { connections++; return p; }, liveSession, guide);
++  c.message({type:'start',language:'ru',game:game('welcome')});
++  p.emit('open'); p.message({type:'session.updated'});
++  let responses = 1;
++  for (let step = 0; step < 6; step++) {
++    const next = step < 5 ? game('quiz',step,Array(step).fill(0)) : game('result',4,Array(5).fill(0),0);
++    p.message({type:'response.created',response:{id:`r${step}`}});
++    c.message({type:'playback',busy:true});
++    c.message({type:'game',game:next});
++    p.message({type:'response.done',response:{status:'completed'}});
++    t.mock.timers.tick(4000);
++    assert.equal(p.sent.filter(e=>e.type==='response.create').length,responses,'generation done is not playback done');
++    c.message({type:'playback',busy:false});
++    t.mock.timers.tick(349);
++    assert.equal(p.sent.filter(e=>e.type==='response.create').length,responses);
++    t.mock.timers.tick(1);
++    assert.equal(p.sent.filter(e=>e.type==='response.create').length,++responses,'request within 350 ms, not an extra two seconds');
++    const prompt=p.sent.at(-1).response.instructions;
++    assert.ok(prompt.includes(step<5?questions[step].title:'Result shown: Data Science'));
++    assert.match(prompt,step<5?/previous choice inform/:/finished the five choices/);
++  }
++  assert.equal(connections,1); assert.equal(p.sent.some(e=>e.type==='response.cancel'),false);
++  c.close();
++});
++test('fast touches coalesce to the latest question and contact entry cancels the pending hint', t => {
++  t.mock.timers.enable({apis:['setTimeout','Date']});
++  const c=new Socket(),p=new Socket(); relayLive(c,()=>p,liveSession,guide);
++  c.message({type:'start',language:'en',game:game('welcome')});p.emit('open');p.message({type:'session.updated'});
++  p.message({type:'response.done',response:{status:'completed'}});
++  c.message({type:'game',game:game('quiz',0)});
++  c.message({type:'game',game:game('quiz',1,[2])});
++  t.mock.timers.tick(350);
++  assert.equal(p.sent.filter(e=>e.type==='response.create').length,2);
++  assert.ok(p.sent.at(-1).response.instructions.includes(questions[1].title));
++  p.message({type:'response.done',response:{status:'completed'}});
++  c.message({type:'game',game:game('result',4,[0,0,0,0,0],0)});
++  c.message({type:'game',game:game('contact',4,[0,0,0,0,0],0)});
++  t.mock.timers.tick(10000);
++  assert.equal(p.sent.filter(e=>e.type==='response.create').length,2);
++  c.close();
++});
++test('a visitor speaking gets priority over a pending automatic quiz turn', t => {
++  t.mock.timers.enable({apis:['setTimeout','Date']});
++  const c=new Socket(),p=new Socket();relayLive(c,()=>p,liveSession,guide);
++  c.message({type:'start',language:'ru',game:game('welcome')});p.emit('open');p.message({type:'session.updated'});
++  p.message({type:'response.done',response:{status:'completed'}});
++  c.message({type:'game',game:game('quiz',1,[0])});
++  p.message({type:'input_audio_buffer.speech_started'});
++  t.mock.timers.tick(5000);
++  assert.equal(p.sent.filter(e=>e.type==='response.create').length,1);
++  assert.ok(p.sent.findLast(e=>e.type==='session.update').session.instructions.includes(questions[1].title));
++  c.close();
++});
+ test('one voice session follows every game stage and remains open beyond two minutes', t => {
+   t.mock.timers.enable({ apis: ['setTimeout'] });
+   const client = new Socket(), provider = new Socket(); let connections = 0;
+--- a/VOICE-BRIEF.md
++++ b/VOICE-BRIEF.md
+@@ -19,7 +19,7 @@
+ 
+ The relay validates bounded context fields and computes facts from server-owned catalogs. `/demo` receives phase, language, revision and one enumerated choice; no arbitrary browser instructions or fabricated counts. It explicitly distinguishes availability still unknown (3 initially, 2 after week/month) from interviews not yet booked (5). An ambiguous question should name the metric or ask a brief clarification. Voice cannot make the fictional workflow into a production product integration.
+ 
+-Home quiz transitions refresh context without cutting off conversation. Brief screen observations wait for a conversational pause; a visitor-led creative exchange suppresses automatic quiz hints. In `/demo`, changing a fact cancels speech about the prior revision, clears playback/caption and suppresses late old packets. A one-time demo opening is a response instruction, not a lingering fake user request.
++Home quiz transitions refresh context without cutting off conversation. On `/`, a brief current-question turn is requested after 350 ms of quiet once generation and actual playback have finished (120 ms touch coalescing if already quiet). Fast touches keep only the latest question; results get a short explanation, and the contact form stays quiet. This is local scheduling time, not a promise of first-audio latency. Explicit Navi taps do not add an idle delay. Brief screen observations wait for a conversational pause; a visitor-led creative exchange suppresses automatic quiz hints. In `/demo`, changing a fact cancels speech about the prior revision, clears playback/caption and suppresses late old packets. A one-time demo opening is a response instruction, not a lingering fake user request.
+ 
+ Actual visitor speech interrupts output; the worklet clears queued sound and truncates the provider conversation at the actual played sample. Faster-than-playback bursts preserve words within a 30-second bound. Mouth motion is driven by **played PCM levels**, closes at silence/stop and respects reduced motion. Stop immediately stops microphone tracks and disconnects playback; the relay closes its provider socket. Local session-close UI timing is not proof of a remote-provider close acknowledgement.
+ 

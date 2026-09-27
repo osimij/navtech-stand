@@ -1,0 +1,14 @@
+{
+  "sessions": {
+    "count": 15,
+    "missing_baseline": [],
+    "changed_baseline": [],
+    "new_unrelated": []
+  },
+  "leads": {
+    "count": 0,
+    "missing_baseline": [],
+    "changed_baseline": [],
+    "new_unrelated": []
+  }
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "language": "ru",
+    "originalGapStartMs": 1500,
+    "originalGapMs": 360,
+    "addedMs": 240.0,
+    "measuredInternalGapMs": 600,
+    "durationMs": 6490.0,
+    "gapDetection": "20ms RMS windows, threshold0.01; synthetic QA signal, not VAD ground truth"
+  },
+  {
+    "language": "en",
+    "originalGapStartMs": 2340,
+    "originalGapMs": 520,
+    "addedMs": 80.0,
+    "measuredInternalGapMs": 600,
+    "durationMs": 7030.0,
+    "gapDetection": "20ms RMS windows, threshold0.01; synthetic QA signal, not VAD ground truth"
+  }
+]

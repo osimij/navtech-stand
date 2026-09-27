@@ -1,0 +1,11 @@
+# Color and icon visual pass · 22 September 2026
+
+Complete. Local invitation: http://localhost:5173/ · Prism: http://localhost:5173/screen
+
+The supplied reference informed the rounded card, compact horizontal bars and distinct restrained accents. The result keeps three roles and exposes answer-support points rather than intelligence, skill or match percentages. Bars scale to the leading score. Selecting a bar updates the existing useful role detail immediately; there is no report gate.
+
+A single role color/icon system is shared by personal results and Prism. Task icons illustrate question choices while one accent per situation keeps career mapping implicit. The invitation’s three step icons explain the journey. Role details reuse the selected accent for skills/project, with meaningful section icons. Prism has larger colored bars, matching role icons, actual counts and task icons in the answer view. Scoring, content, persistence, data contracts and voice behavior were not changed.
+
+Checks: TypeScript, targeted ESLint (zero errors/warnings) and production build passed. Existing1280px browser visual review covered invitation, question, RU/EN results and both Prism chart views. Default result tasks, evidence, skills and starter project fit in the first view (project bottom approximately654px). Mouse and keyboard role selection passed. Document width1265px at viewport1280px; no horizontal overflow. Role ink/background contrast is6.11:1–7.57:1. Essential text/counts are visible without hover. Focus outlines and text/icons/selection marks supplement color. No provider or full repeated data rehearsal was run.
+
+A fresh baseline contained10sessions/0leads. One exact identified synthetic record was used for visual review and removed. All10baseline full-row hashes remain unchanged; one newer unrelated session is preserved, leaving11sessions/0leads at cleanup (2current starts,1current completion;9old starts/4old completions). Temporary review routing was removed. Normal preview is ready, microphone/camera off, no deployment. Screenshots were reviewed inline; the documented screenshot interface did not provide local file output. Physical/narrow-screen verification remains outside the actual1280px check. The existing Vinext unknown-route-classification notice remains; all build stages succeed.

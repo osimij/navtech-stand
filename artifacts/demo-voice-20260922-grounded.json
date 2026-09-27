@@ -1,0 +1,260 @@
+{
+  "origin": "automated_test",
+  "scenario_data_mode": "sample",
+  "model": "gpt-realtime-2.1",
+  "voice": "marin",
+  "vad": "semantic_high",
+  "prompt_version": "short opening, count-only reply, explicit availability versus booked metric, non-user greeting",
+  "input": "synthetic Tajik PCM, paced at 24 kHz; playback drain simulated",
+  "started_at": "2026-09-21T22:15:54.503Z",
+  "inputs": [
+    {
+      "text": "Як савол дорам, дар ин мисол чанд дархост ҳанӯз вақти мусоҳибаро муайян накардааст?",
+      "seconds": 8.6,
+      "pause": {
+        "at_ms": 1860,
+        "added_ms": 600
+      }
+    },
+    {
+      "text": "Акнун ман «Ҳамин ҳафта»-ро интихоб кардам. Чанд дархост ҳанӯз вақти муайян надорад?",
+      "seconds": 7.45,
+      "pause": null
+    }
+  ],
+  "turns": [
+    {
+      "stage": 0,
+      "revision": 1,
+      "transcript": "Салом! Кадом қисми мисолро дида мебароем?",
+      "seconds": 3.45,
+      "first_audio_after_input_end_ms": null,
+      "premature_response": false,
+      "status": "completed"
+    },
+    {
+      "stage": 1,
+      "revision": 1,
+      "transcript": "3 дархост ҳанӯз вақти мусоҳибаро муайян накардааст.",
+      "seconds": 4.7,
+      "first_audio_after_input_end_ms": 2778,
+      "premature_response": false,
+      "status": "completed"
+    },
+    {
+      "stage": 2,
+      "revision": 2,
+      "transcript": "2 дархост ҳанӯз вақтро муайян накардааст, онҳо HR-01 ва HR-05 мебошанд.",
+      "seconds": 8.35,
+      "first_audio_after_input_end_ms": 1497,
+      "premature_response": false,
+      "status": "completed"
+    },
+    {
+      "stage": 4,
+      "revision": 2,
+      "transcript": "Метавонем",
+      "seconds": 0.4,
+      "first_audio_after_input_end_ms": 12142,
+      "premature_response": false,
+      "status": "cancelled"
+    }
+  ],
+  "trace": [
+    {
+      "event": "start",
+      "ms": 2,
+      "stage": 0
+    },
+    {
+      "event": "ready",
+      "ms": 2333,
+      "stage": 0
+    },
+    {
+      "event": "response.started",
+      "ms": 2595,
+      "stage": 0,
+      "revision": 1,
+      "input_still_streaming": false
+    },
+    {
+      "event": "first_audio",
+      "ms": 3199,
+      "stage": 0,
+      "revision": 1
+    },
+    {
+      "event": "response.done",
+      "ms": 3673,
+      "stage": 0,
+      "status": "completed"
+    },
+    {
+      "event": "question_1_started",
+      "ms": 7162,
+      "stage": 1
+    },
+    {
+      "event": "audio.clear",
+      "ms": 7859,
+      "stage": 1,
+      "reason": "speech"
+    },
+    {
+      "event": "input.speech_started",
+      "ms": 7859,
+      "stage": 1,
+      "input_still_streaming": true
+    },
+    {
+      "event": "input_finished",
+      "ms": 16138,
+      "stage": 1
+    },
+    {
+      "event": "input.speech_stopped",
+      "ms": 18059,
+      "stage": 1,
+      "input_still_streaming": false
+    },
+    {
+      "event": "response.started",
+      "ms": 18065,
+      "stage": 1,
+      "revision": 1,
+      "input_still_streaming": false
+    },
+    {
+      "event": "first_audio",
+      "ms": 18916,
+      "stage": 1,
+      "revision": 1
+    },
+    {
+      "event": "response.done",
+      "ms": 19710,
+      "stage": 1,
+      "status": "completed"
+    },
+    {
+      "event": "changed_to_week_question_2_started",
+      "ms": 24168,
+      "stage": 2
+    },
+    {
+      "event": "audio.clear",
+      "ms": 24169,
+      "stage": 2,
+      "reason": "demo_change"
+    },
+    {
+      "event": "audio.clear",
+      "ms": 24532,
+      "stage": 2,
+      "reason": "speech"
+    },
+    {
+      "event": "input.speech_started",
+      "ms": 24532,
+      "stage": 2,
+      "input_still_streaming": true
+    },
+    {
+      "event": "input_finished",
+      "ms": 31959,
+      "stage": 2
+    },
+    {
+      "event": "input.speech_stopped",
+      "ms": 32593,
+      "stage": 2,
+      "input_still_streaming": false
+    },
+    {
+      "event": "response.started",
+      "ms": 32601,
+      "stage": 2,
+      "revision": 2,
+      "input_still_streaming": false
+    },
+    {
+      "event": "first_audio",
+      "ms": 33456,
+      "stage": 2,
+      "revision": 2
+    },
+    {
+      "event": "response.done",
+      "ms": 35351,
+      "stage": 2,
+      "status": "completed"
+    },
+    {
+      "event": "interruption_probe_requested",
+      "ms": 42550,
+      "stage": 3
+    },
+    {
+      "event": "response.started",
+      "ms": 43491,
+      "stage": 3,
+      "revision": 2,
+      "input_still_streaming": false
+    },
+    {
+      "event": "first_audio",
+      "ms": 44101,
+      "stage": 3,
+      "revision": 2
+    },
+    {
+      "event": "change_during_output",
+      "ms": 44101,
+      "stage": 4
+    },
+    {
+      "event": "audio.clear",
+      "ms": 44101,
+      "stage": 4,
+      "reason": "demo_change"
+    },
+    {
+      "event": "response.done",
+      "ms": 44455,
+      "stage": 4,
+      "status": "cancelled"
+    },
+    {
+      "event": "response.started",
+      "ms": 46676,
+      "stage": 4,
+      "revision": 3,
+      "input_still_streaming": false
+    },
+    {
+      "event": "first_audio",
+      "ms": 47135,
+      "stage": 4,
+      "revision": 3
+    },
+    {
+      "event": "fresh_revision_audio",
+      "ms": 47135,
+      "stage": 4,
+      "elapsed_since_change_ms": 3034
+    },
+    {
+      "event": "close_requested",
+      "ms": 47135,
+      "stage": 4
+    },
+    {
+      "event": "session.closed",
+      "ms": 47135,
+      "stage": 4
+    }
+  ],
+  "closed": true,
+  "completed_at": "2026-09-21T22:16:41.644Z"
+}

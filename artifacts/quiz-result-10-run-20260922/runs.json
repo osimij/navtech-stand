@@ -1,0 +1,410 @@
+{
+  "source": "Transcribed from CUA reads of the temporary browser-visible JSON panel, not a browser download. All clicks performed in actual IAB on original / quiz.",
+  "distributionPredeclared": {
+    "normal": 4,
+    "delay": 3,
+    "failure": 3
+  },
+  "gateMs": 500,
+  "visibilityMethod": "Final React click event.timeStamp → performance.now after two requestAnimationFrame callbacks following result commit; heading fully in viewport, visible document and ancestors, three advice steps present. DOM-after-render proxy, not hardware pixel or comprehension measurement. No waiting for save.",
+  "faultInjection": "Temporary localhost QA query adds x-result-rehearsal header only to real /api/sessions PATCH. After real session authorization, delay waits 2500 ms before real UPDATE; failure returns HTTP 503 before UPDATE. POST and all normal persistence remain real. All injections removed afterward.",
+  "runs": [
+    {
+      "run": "R01",
+      "condition": "normal",
+      "route": "/",
+      "sessionId": "04bc2f2a-30c6-4b44-a9da-d6dc565ac0a5",
+      "answers": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "timeOrigin": 1790031689305.1,
+      "finalInputTimestamp": 37265,
+      "resultVisibleTimestamp": 37287.09999990463,
+      "deltaMs": 22.09999990463257,
+      "inputUtc": "2026-09-21T23:02:06.570100+00:00",
+      "visibleUtc": "2026-09-21T23:02:06.592200+00:00",
+      "observedHeading": "Один отчёт. Один полезный вывод.",
+      "observedProfile": "data",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "saved",
+      "terminalSaveState": "saved",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    },
+    {
+      "run": "R02",
+      "condition": "normal",
+      "route": "/",
+      "sessionId": "9710121b-f43e-4c36-9630-7103cdb9abcf",
+      "answers": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "timeOrigin": 1790031783554.7,
+      "finalInputTimestamp": 3258.899999856949,
+      "resultVisibleTimestamp": 3286.5,
+      "deltaMs": 27.600000143051147,
+      "inputUtc": "2026-09-21T23:03:06.813600+00:00",
+      "visibleUtc": "2026-09-21T23:03:06.841200+00:00",
+      "observedHeading": "Начните с одной повторяющейся задачи.",
+      "observedProfile": "ai",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "saved",
+      "terminalSaveState": "saved",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    },
+    {
+      "run": "R03",
+      "condition": "normal",
+      "route": "/",
+      "sessionId": "48b20433-6f8c-465f-bef6-035426f21f4e",
+      "answers": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "timeOrigin": 1790031787290.5,
+      "finalInputTimestamp": 3175.7000000476837,
+      "resultVisibleTimestamp": 3205.100000143051,
+      "deltaMs": 29.40000009536743,
+      "inputUtc": "2026-09-21T23:03:10.466200+00:00",
+      "visibleUtc": "2026-09-21T23:03:10.495600+00:00",
+      "observedHeading": "Проверьте проблему раньше решения.",
+      "observedProfile": "product",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "saved",
+      "terminalSaveState": "saved",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    },
+    {
+      "run": "R04",
+      "condition": "normal",
+      "route": "/",
+      "sessionId": "faa1ffea-2c6c-4ad1-8b98-deb5d24a4788",
+      "answers": [
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "timeOrigin": 1790031790733.9,
+      "finalInputTimestamp": 3087.5,
+      "resultVisibleTimestamp": 3113.5999999046326,
+      "deltaMs": 26.09999990463257,
+      "inputUtc": "2026-09-21T23:03:13.821400+00:00",
+      "visibleUtc": "2026-09-21T23:03:13.847500+00:00",
+      "observedHeading": "Упростите один переход между людьми.",
+      "observedProfile": "systems",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "saved",
+      "terminalSaveState": "saved",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    },
+    {
+      "run": "R05",
+      "condition": "delay",
+      "route": "/",
+      "sessionId": "e57a0fef-a14d-42fa-bd3f-b65f3bf98aae",
+      "answers": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "timeOrigin": 1790031800631.1,
+      "finalInputTimestamp": 2946.899999856949,
+      "resultVisibleTimestamp": 2975.5999999046326,
+      "deltaMs": 28.700000047683716,
+      "inputUtc": "2026-09-21T23:03:23.578000+00:00",
+      "visibleUtc": "2026-09-21T23:03:23.606700+00:00",
+      "observedHeading": "Один отчёт. Один полезный вывод.",
+      "observedProfile": "data",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "saving",
+      "terminalSaveState": "saved",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    },
+    {
+      "run": "R06",
+      "condition": "delay",
+      "route": "/",
+      "sessionId": "49867607-8efa-4654-9918-f4e4db931ba7",
+      "answers": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "timeOrigin": 1790031806137.3,
+      "finalInputTimestamp": 3165.199999809265,
+      "resultVisibleTimestamp": 3190.5,
+      "deltaMs": 25.300000190734863,
+      "inputUtc": "2026-09-21T23:03:29.302500+00:00",
+      "visibleUtc": "2026-09-21T23:03:29.327800+00:00",
+      "observedHeading": "Начните с одной повторяющейся задачи.",
+      "observedProfile": "ai",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "saving",
+      "terminalSaveState": "saved",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    },
+    {
+      "run": "R07",
+      "condition": "delay",
+      "route": "/",
+      "sessionId": "eb107180-bb11-4384-9a70-b6ea5d47c34a",
+      "answers": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "timeOrigin": 1790031811931.9,
+      "finalInputTimestamp": 3324.5999999046326,
+      "resultVisibleTimestamp": 3351,
+      "deltaMs": 26.40000009536743,
+      "inputUtc": "2026-09-21T23:03:35.256500+00:00",
+      "visibleUtc": "2026-09-21T23:03:35.282900+00:00",
+      "observedHeading": "Проверьте проблему раньше решения.",
+      "observedProfile": "product",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "saving",
+      "terminalSaveState": "saved",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    },
+    {
+      "run": "R08",
+      "condition": "failure",
+      "route": "/",
+      "sessionId": "6ec8195d-32ea-4dfd-83a6-905061ab44f5",
+      "answers": [
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "timeOrigin": 1790031824224.8,
+      "finalInputTimestamp": 3074.199999809265,
+      "resultVisibleTimestamp": 3101.5,
+      "deltaMs": 27.300000190734863,
+      "inputUtc": "2026-09-21T23:03:47.299000+00:00",
+      "visibleUtc": "2026-09-21T23:03:47.326300+00:00",
+      "observedHeading": "Упростите один переход между людьми.",
+      "observedProfile": "systems",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "error",
+      "terminalSaveState": "error",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    },
+    {
+      "run": "R09",
+      "condition": "failure",
+      "route": "/",
+      "sessionId": "6b69ea2d-d807-41ff-b4e6-6f64329ae58d",
+      "answers": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "timeOrigin": 1790031827566.4,
+      "finalInputTimestamp": 3134,
+      "resultVisibleTimestamp": 3162.7999999523163,
+      "deltaMs": 28.799999952316284,
+      "inputUtc": "2026-09-21T23:03:50.700400+00:00",
+      "visibleUtc": "2026-09-21T23:03:50.729200+00:00",
+      "observedHeading": "Один отчёт. Один полезный вывод.",
+      "observedProfile": "data",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "error",
+      "terminalSaveState": "error",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    },
+    {
+      "run": "R10",
+      "condition": "failure",
+      "route": "/",
+      "sessionId": "27c91e92-5257-4fb9-b8f7-85520e30fba9",
+      "answers": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "timeOrigin": 1790031831133.2,
+      "finalInputTimestamp": 3303.300000190735,
+      "resultVisibleTimestamp": 3332.300000190735,
+      "deltaMs": 29,
+      "inputUtc": "2026-09-21T23:03:54.436500+00:00",
+      "visibleUtc": "2026-09-21T23:03:54.465500+00:00",
+      "observedHeading": "Начните с одной повторяющейся задачи.",
+      "observedProfile": "ai",
+      "threeAdviceStepsPresent": true,
+      "resultCorrect": true,
+      "saveStateAtFirstInspection": "error",
+      "terminalSaveState": "error",
+      "documentVisible": true,
+      "viewport": {
+        "width": 1809,
+        "height": 1354
+      },
+      "passGate": true
+    }
+  ],
+  "databaseRowsBeforeCleanup": [
+    {
+      "id": "04bc2f2a-30c6-4b44-a9da-d6dc565ac0a5",
+      "completed_at": "2026-09-21T23:02:06.597Z",
+      "profile": "data",
+      "answers": "[0,0,0,0,0]"
+    },
+    {
+      "id": "27c91e92-5257-4fb9-b8f7-85520e30fba9",
+      "completed_at": null,
+      "profile": null,
+      "answers": null
+    },
+    {
+      "id": "48b20433-6f8c-465f-bef6-035426f21f4e",
+      "completed_at": "2026-09-21T23:03:10.483Z",
+      "profile": "product",
+      "answers": "[2,2,2,2,2]"
+    },
+    {
+      "id": "49867607-8efa-4654-9918-f4e4db931ba7",
+      "completed_at": "2026-09-21T23:03:31.819Z",
+      "profile": "ai",
+      "answers": "[1,1,1,1,1]"
+    },
+    {
+      "id": "6b69ea2d-d807-41ff-b4e6-6f64329ae58d",
+      "completed_at": null,
+      "profile": null,
+      "answers": null
+    },
+    {
+      "id": "6ec8195d-32ea-4dfd-83a6-905061ab44f5",
+      "completed_at": null,
+      "profile": null,
+      "answers": null
+    },
+    {
+      "id": "9710121b-f43e-4c36-9630-7103cdb9abcf",
+      "completed_at": "2026-09-21T23:03:06.830Z",
+      "profile": "ai",
+      "answers": "[1,1,1,1,1]"
+    },
+    {
+      "id": "e57a0fef-a14d-42fa-bd3f-b65f3bf98aae",
+      "completed_at": "2026-09-21T23:03:26.097Z",
+      "profile": "data",
+      "answers": "[0,0,0,0,0]"
+    },
+    {
+      "id": "eb107180-bb11-4384-9a70-b6ea5d47c34a",
+      "completed_at": "2026-09-21T23:03:37.775Z",
+      "profile": "product",
+      "answers": "[2,2,2,2,2]"
+    },
+    {
+      "id": "faa1ffea-2c6c-4ad1-8b98-deb5d24a4788",
+      "completed_at": "2026-09-21T23:03:13.836Z",
+      "profile": "systems",
+      "answers": "[3,3,3,3,3]"
+    }
+  ],
+  "countsBeforeCleanup": {
+    "started": 18,
+    "completed": 10,
+    "leads": 0
+  },
+  "countsAfterCleanup": {
+    "started": 8,
+    "completed": 3,
+    "leads": 0
+  },
+  "baselineRowsByteEquivalentByHash": true,
+  "deletedOnlyExactSyntheticSessionIds": [
+    "04bc2f2a-30c6-4b44-a9da-d6dc565ac0a5",
+    "9710121b-f43e-4c36-9630-7103cdb9abcf",
+    "48b20433-6f8c-465f-bef6-035426f21f4e",
+    "faa1ffea-2c6c-4ad1-8b98-deb5d24a4788",
+    "e57a0fef-a14d-42fa-bd3f-b65f3bf98aae",
+    "49867607-8efa-4654-9918-f4e4db931ba7",
+    "eb107180-bb11-4384-9a70-b6ea5d47c34a",
+    "6ec8195d-32ea-4dfd-83a6-905061ab44f5",
+    "6b69ea2d-d807-41ff-b4e6-6f64329ae58d",
+    "27c91e92-5257-4fb9-b8f7-85520e30fba9"
+  ],
+  "gatePassed": true,
+  "humanOrHardwareValidation": false
+}

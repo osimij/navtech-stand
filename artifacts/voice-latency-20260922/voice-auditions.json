@@ -1,0 +1,52 @@
+[
+  {
+    "model": "gpt-realtime-2.1",
+    "voice": "marin",
+    "speed": "default, no playback-rate change",
+    "instructions": "Speak in an easy conversational voice, like talking to one person beside you. Relaxed, matter-of-fact, lightly curious. Natural phrasing and small pauses. No announcer delivery, forced cheer, exaggerated emphasis or breathy performance. Read the supplied line exactly without extra words.",
+    "clips": [
+      {
+        "language": "ru",
+        "requested": "Теперь всё сходится: осталось два отклика. А если кандидат сможет только в следующем месяце? Попробуем.",
+        "transcript": "Теперь всё сходится: осталось два отклика. А если кандидат сможет только в следующем месяце? Попробуем.",
+        "seconds": 8.45,
+        "status": "completed",
+        "file": "audition-marin-ru.wav"
+      },
+      {
+        "language": "en",
+        "requested": "That leaves two applications to clarify. What if the candidate is only free next month? Let’s try it.",
+        "transcript": "That leaves two applications to clarify. What if the candidate is only free next month? Let’s try it.",
+        "seconds": 5.95,
+        "status": "completed",
+        "file": "audition-marin-en.wav"
+      }
+    ],
+    "closed": true
+  },
+  {
+    "model": "gpt-realtime-2.1",
+    "voice": "cedar",
+    "speed": "default, no playback-rate change",
+    "instructions": "Speak in an easy conversational voice, like talking to one person beside you. Relaxed, matter-of-fact, lightly curious. Natural phrasing and small pauses. No announcer delivery, forced cheer, exaggerated emphasis or breathy performance. Read the supplied line exactly without extra words.",
+    "clips": [
+      {
+        "language": "ru",
+        "requested": "Теперь всё сходится: осталось два отклика. А если кандидат сможет только в следующем месяце? Попробуем.",
+        "transcript": "Теперь всё сходится: осталось два отклика. А если кандидат сможет только в следующем месяце? Попробуем.",
+        "seconds": 8.8,
+        "status": "completed",
+        "file": "audition-cedar-ru.wav"
+      },
+      {
+        "language": "en",
+        "requested": "That leaves two applications to clarify. What if the candidate is only free next month? Let’s try it.",
+        "transcript": "That leaves two applications to clarify. What if the candidate is only free next month? Let’s try it.",
+        "seconds": 6.55,
+        "status": "completed",
+        "file": "audition-cedar-en.wav"
+      }
+    ],
+    "closed": true
+  }
+]

@@ -1,0 +1,38 @@
+// Manual integration rehearsal: one paid Realtime session, synthetic context only.
+import WebSocket from 'ws';
+import {writeFileSync} from 'node:fs';
+const ws=new WebSocket('ws://127.0.0.1:5174/api/live/stream',{origin:'http://localhost:5173'});
+const report={at:new Date().toISOString(),kind:'synthetic relay rehearsal; simulated 24 kHz playback, no microphone or database writes',turns:[],errors:[]};
+let step=-1,turn,drainTimer,done=false,endsAt=0,closed=false;
+const send=e=>{if(ws.readyState===1)ws.send(JSON.stringify(e));};
+const deadline=setTimeout(()=>{report.errors.push('100 second rehearsal deadline');ws.terminate();},100000);
+function next(){
+  if(!done||performance.now()<endsAt-2)return;
+  send({type:'playback',busy:false});
+  if(step===5){send({type:'close'});return;}
+  step++;
+  turn={screen:step<5?`question_${step+1}`:'result',changedAt:performance.now(),text:'',audioMs:0};report.turns.push(turn);done=false;endsAt=0;
+  send({type:'game',game:{phase:step<5?'quiz':'result',step:Math.min(step,4),answers:Array(Math.min(step,5)).fill(0),selected:step===5?0:null,interest:''}});
+}
+ws.on('open',()=>{
+  turn={screen:'welcome',changedAt:performance.now(),text:'',audioMs:0};report.turns.push(turn);
+  send({type:'start',language:'ru',game:{phase:'welcome',step:0,answers:[],selected:null,interest:''}});
+});
+ws.on('message',raw=>{
+  const e=JSON.parse(raw);
+  if(e.type==='response.started')turn.requestMs=Math.round(performance.now()-turn.changedAt);
+  if(e.type==='session.output_audio.delta'){
+    const pcm=Buffer.from(e.delta,'base64');
+    if(turn.firstPacketMs===undefined)turn.firstPacketMs=Math.round(performance.now()-turn.changedAt);
+    if(turn.firstSignalMs===undefined){for(let i=0;i<pcm.length;i+=2)if(Math.abs(pcm.readInt16LE(i))>300){turn.firstSignalMs=Math.round(performance.now()-turn.changedAt);break;}}
+    const duration=pcm.length/48;turn.audioMs+=duration;
+    endsAt=Math.max(performance.now(),endsAt)+duration;
+    send({type:'playback',busy:true});clearTimeout(drainTimer);drainTimer=setTimeout(next,Math.ceil(endsAt-performance.now())+2);
+  }
+  if(e.type==='session.output_transcript.delta')turn.text+=e.delta;
+  if(e.type==='response.done'){done=true;if(!endsAt){report.errors.push(`no audio for ${turn.screen}`);send({type:'close'});}else next();}
+  if(e.type==='error'){report.errors.push(e.error);send({type:'close'});}
+  if(e.type==='session.closed'){closed=true;ws.close();}
+});
+ws.on('error',e=>report.errors.push(e.message));
+ws.on('close',()=>{clearTimeout(deadline);clearTimeout(drainTimer);report.closed=closed;report.pass=closed&&report.errors.length===0&&report.turns.length===7&&report.turns.every(t=>t.firstSignalMs!==undefined);writeFileSync('artifacts/quiz-voice-continuity-short-20260922.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));process.exitCode=report.pass?0:1;});

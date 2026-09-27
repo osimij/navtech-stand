@@ -1,0 +1,13 @@
+{
+  "source": "Actual IAB AudioContext/AudioWorklet, synthetic MediaStreamAudioDestination input using existing Tajik WAVs; transcribed from visible CUA journal. Not microphone/speaker acoustic measurement.",
+  "startedAt": "2026-09-22T03:55:18.380Z",
+  "model":"gpt-realtime-2.1", "voice":"marin", "reasoning":"low", "vad":"semantic_high",
+  "cold":{"explicitStartMs":0.8,"localMicrophoneReadyMs":18.6,"channelOpenMs":20.6,"sessionReadyMs":2243,"responseCreatedMs":2598.9,"firstPacketMs":3198,"firstPlayedMs":3253.5,"baseLatencySeconds":0.005333333333333333,"outputLatencySeconds":0.024,"caption":"Салом! Кадом қисми мисолро дида мебароем?"},
+  "spoken":[
+    {"fixture":"demo-voice-20260922-input-1.wav","inputStartMs":12438.6,"lastInputSignalMs":20533.89999985695,"inputFileEndedMs":21040.3,"speechStoppedMs":23371.7,"responseCreatedMs":23373.5,"firstPacketMs":24123.8,"firstPlayedMs":24160,"caption":"Се дархост ҳанӯз вақти мусоҳибаро равшан накардаанд.","correctCount":3,"prematureGeneration":{"speechStoppedMs":14919.1,"responseCreatedMs":14920.8,"speechResumedMs":15444.1,"cancelledMs":15488.5,"earlyPlayedAudioObserved":false}},
+    {"fixture":"demo-voice-20260922-input-2.wav","inputStartMs":55507.9,"lastInputSignalMs":62453.59999990463,"inputFileEndedMs":62955.1,"speechStoppedMs":65364.6,"responseCreatedMs":65371.5,"firstPacketMs":66079.7,"firstPlayedMs":66133.6,"caption":"Ду дархост ҳанӯз вақти мусоҳибаро муайян накардааст.","correctCount":2,"prematureGeneration":null}
+  ],
+  "explicitHelp":{"tapMs":94038.7,"responseCreatedMs":94995.7,"firstPacketMs":95540.9,"firstPlayedMs":95626.6},
+  "contextOnly":null,
+  "limitation":"Rehearsal tab11 disappeared from the shared browser session before context-only export and explicit final stop. Captured evidence above was preserved. Browser socket lifetime ends on tab closure; harness also had a150-second limit. No missing trace is presented as a pass."
+}

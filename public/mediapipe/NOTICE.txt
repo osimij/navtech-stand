@@ -1,0 +1,5 @@
+MediaPipe Tasks Vision 1.0.1 and BlazeFace short-range model v1.
+Copyright Google LLC. Licensed under Apache License 2.0; see LICENSE.
+Runtime source: https://www.npmjs.com/package/@mediapipe/tasks-vision/v/1.0.1
+Model source: https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite
+Files are self-hosted so inference sends no video or face data to Google.
