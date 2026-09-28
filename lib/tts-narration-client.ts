@@ -16,6 +16,9 @@ function lineFailure(status:number,data:{error?:string;code?:string;providerStat
 }
 export function createTtsNarration(callbacks:Callbacks={},env:Environment=browser){
  let run:Run|null=null,disposed=false,game:GameContext={phase:'welcome',step:0,answers:[],selected:null,interest:''};
+ // The first name the visitor typed, if any. It travels beside the game state, never inside it: the server says it
+ // only after its own check and never caches that line.
+ let name='';
  const silence=()=>callbacks.onSpeech?.({speaking:false,level:0});
  function emit(phase:LiveState['phase'],error=''){if(!disposed)callbacks.onState?.({phase,error,playbackBlocked:Boolean(run&&run.context.state!=='running')});}
  function stop(error=''){
@@ -27,7 +30,7 @@ export function createTtsNarration(callbacks:Callbacks={},env:Environment=browse
   const current=()=>run===r&&r.revision===revision&&!request.signal.aborted;
   r.node?.port.postMessage({type:'clear'});callbacks.onCaption?.('');silence();
   try{
-   const response=await env.fetch('/api/voice-lab/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({selection:r.selection,language:r.language,game,cue,variant}),signal:request.signal});
+   const response=await env.fetch('/api/voice-lab/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({selection:r.selection,language:r.language,game,cue,variant,...name?{name}:{}}),signal:request.signal});
    if(!current())return;
    if(!response.ok)throw lineFailure(response.status,await response.json().catch(()=>({})) as Parameters<typeof lineFailure>[1]);
    if(!response.body)throw Error('Пустой аудиопоток.');
@@ -75,5 +78,5 @@ export function createTtsNarration(callbacks:Callbacks={},env:Environment=browse
   game=next;
   if(changed&&run){run.request?.abort();run.revision++;run.node?.port.postMessage({type:'clear'});callbacks.onCaption?.('');silence();if(run.ready&&(screenChanged||next.phase==='result'))void speak();}
  }
- return {start,stop:()=>stop(),updateGame,greet:()=>{const r=run;if(!r?.ready||Date.now()-r.lastTap<6500||r.taps>=12)return;r.lastTap=Date.now();void speak('tap',r.taps++%3);},resumePlayback:()=>{const r=run;if(r)void r.context.resume().then(()=>{if(run===r)emit('ready');}).catch(()=>{if(run===r)stop('Не удалось включить звук.');});},dispose:()=>{stop();disposed=true;}};
+ return {start,stop:()=>stop(),updateGame,setName:(next:string)=>{name=next;},greet:()=>{const r=run;if(!r?.ready||Date.now()-r.lastTap<6500||r.taps>=12)return;r.lastTap=Date.now();void speak('tap',r.taps++%3);},resumePlayback:()=>{const r=run;if(r)void r.context.resume().then(()=>{if(run===r)emit('ready');}).catch(()=>{if(run===r)stop('Не удалось включить звук.');});},dispose:()=>{stop();disposed=true;}};
 }

@@ -1,10 +1,11 @@
 // Synthesize every approved narration line once on a hosted site, so visitors are always served from its cache.
 //   node scripts/warm-narration.mjs https://navtech-stand.vercel.app
 //   node scripts/warm-narration.mjs --list          (print the lines and their length; no requests)
+// Lines with a visitor's name are never cached, so only their nameless versions are warmed here.
 // Lines already cached cost nothing. New lines go through the site's own route (Sienna, eleven_v4_turbo) one at a time.
 // Stops at the first settings error (missing key, rejected voice, exhausted credits); never retries a line.
 import {questions,profiles,scoreAnswers} from '../lib/quiz.ts';
-import {narrationText,tapLines} from '../lib/narration-text.ts';
+import {narrationText,tapLines,contactSteps} from '../lib/narration-text.ts';
 import {siennaNarrator} from '../lib/voice-catalog.ts';
 
 const game=(phase,answers=[],step=0)=>({phase,step,answers,selected:null,interest:''});
@@ -25,11 +26,11 @@ for(const language of ['ru','en']){
   const text=narrationText(g,language,cue,variant);
   if(!lines.some(l=>l.language===language&&l.text===text))lines.push({language,label,text,body:{language,selection:siennaNarrator,game:g,cue,variant}});
  };
- add('welcome',game('welcome'));
+ add('welcome',game('welcome'));add('name',game('name'));add('hello',game('hello'));
  questions.forEach((_,step)=>add(`question ${step+1}`,game('quiz',full.slice(0,step),step)));
  for(const [key,answers] of results)add(key==='tie'?'result tie':`result ${profiles[key].id}`,game('result',answers));
- add('contact',game('contact',full));add('success',game('success',full));
- for(const phase of Object.keys(tapLines[language]))for(let v=0;v<3;v++)add(`tap ${phase} ${v+1}`,game(phase,phase==='welcome'||phase==='quiz'?[]:full),'tap',v);
+ contactSteps.forEach((step,index)=>add(`request ${step}`,game('contact',full,index)));add('success',game('success',full));
+ for(const phase of Object.keys(tapLines[language]))for(let v=0;v<3;v++)add(`tap ${phase} ${v+1}`,game(phase,['welcome','name','hello','quiz'].includes(phase)?[]:full),'tap',v);
 }
 
 if(process.argv[2]==='--list'){

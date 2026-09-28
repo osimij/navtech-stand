@@ -165,10 +165,11 @@ function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: 
       const next = `translate3d(${(shown.x - CANVAS / 2).toFixed(2)}px,${(shown.y - CANVAS / 2).toFixed(2)}px,0) scale(${scale.toFixed(4)})`;
       if (next !== transform) { transform = next; layer.style.transform = next; dirty = true; }
       layer.style.opacity = opacity.toFixed(3);
-      // Draw at the resolution Navi is actually shown at (never above the device's), in coarse steps.
+      // Draw at the resolution Navi is actually shown at, in coarse steps. The large seat beside the questions shows
+      // the canvas at about twice its size, so the buffer may grow to three times the canvas before it is upscaled.
       const scaleOf = (size: number) => size * BODY_SHARE / (bodyRatio * CANVAS);
       const wanted = Math.max(trip ? scaleOf(trip.from.size) : scale, target ? scaleOf(target.size) : scale);
-      model.resize(CANVAS, Math.max(.5, Math.ceil(Math.min(1, wanted * 1.08) * devicePixelRatio * 8) / 8));
+      model.resize(CANVAS, Math.max(.5, Math.ceil(Math.min(3, wanted * 1.08 * devicePixelRatio) * 8) / 8));
     }
     if (!reduced) model.render(rig.update(dt));
     else if (dirty) model.render(rig.still());

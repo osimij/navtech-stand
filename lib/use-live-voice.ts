@@ -22,6 +22,7 @@ export function useLiveVoice(onSpeech?: (frame: SpeechFrame) => void, onCaption?
   }), []);
   const start = useCallback((language: VoiceLanguage, action?: CreativeAction, options?: VoiceOptions) => getController().start(language, action, options), [getController]);
   const updateGame = useCallback((game: GameContext) => getController().updateGame(game), [getController]);
+  const setName = useCallback((name: string) => getController().setName(name), [getController]);
   const updateDemo = useCallback((demo: DemoContext) => getController().updateDemo(demo), [getController]);
   const stop = useCallback(() => controller.current?.stop(), []);
   const resumePlayback = useCallback(() => controller.current?.resumePlayback(), []);
@@ -31,5 +32,5 @@ export function useLiveVoice(onSpeech?: (frame: SpeechFrame) => void, onCaption?
     const current = getController();
     return () => { current.dispose(); if (controller.current === current) controller.current = null; };
   }, [getController]);
-  return { ...state, start, stop, updateGame, updateDemo, greet, creative, resumePlayback, busy: ['connecting', 'ready', 'closing'].includes(state.phase) };
+  return { ...state, start, stop, updateGame, setName, updateDemo, greet, creative, resumePlayback, busy: ['connecting', 'ready', 'closing'].includes(state.phase) };
 }

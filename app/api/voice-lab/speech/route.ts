@@ -9,6 +9,7 @@ import { body, json, sameOrigin } from "@/lib/server";
 import { createGameGuide } from "@/lib/live-game";
 import { questions, profiles, scoreAnswers, interestLabels } from "@/lib/quiz";
 import { narrationText } from "@/lib/narration-text";
+import { visitorName } from "@/lib/visitor-name";
 import { parseVoiceSelection, siennaNarrator } from "@/lib/voice-catalog";
 import { speechRequest, providerFailure } from "@/lib/voice-provider";
 
@@ -18,6 +19,17 @@ export const maxDuration = 60;
 const guide = createGameGuide({ questions, profiles, scoreAnswers, interestLabels });
 // Lines being synthesized by this instance. A second request for the same line waits for it instead of paying twice.
 const inflight = new Map<string, Promise<Uint8Array | null>>();
+// A line with the visitor's name is synthesized every time and never stored, so it has no cache to bound its cost.
+// Each instance says at most this many names a minute; beyond that Navi says the same line without the name.
+const NAMES_PER_MINUTE = 30;
+let named: number[] = [];
+function nameAllowed() {
+  const now = Date.now();
+  named = named.filter(at => now - at < 60000);
+  if (named.length >= NAMES_PER_MINUTE) return false;
+  named.push(now);
+  return true;
+}
 
 async function digest(value: string) {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
@@ -39,12 +51,16 @@ export async function POST(request: Request) {
   const game = guide.parse(data.game), cue = data.cue ?? "screen", variant = data.variant ?? 0;
   if (!game || !["screen", "tap"].includes(cue) || !Number.isInteger(variant) || variant < 0 || variant > 2) return json({ error: "Invalid narration cue." }, 400);
 
-  const text = narrationText(game, language, cue, variant);
+  const plain = narrationText(game, language, cue, variant);
+  const name = visitorName(data.name);
+  const withName = name ? narrationText(game, language, cue, variant, name) : plain;
+  const personal = withName !== plain && nameAllowed();
+  const text = personal ? withName : plain;
   const key = setting("ELEVENLABS_API_KEY") || "";
   const provider = speechRequest(selection, language, text, key);
   // Same cache identity as the local voice lab: settings, text and voice all take part.
   const id = await digest(JSON.stringify({ v: 2, provider: "elevenlabs", url: provider.url, body: provider.init.body }));
-  try {
+  if (!personal) try {
     const cached = await voiceCache.get(id);
     if (cached) return pcm(cached as Uint8Array<ArrayBuffer>, text, "hit");
   } catch { /* A cache outage should not silence the booth; synthesize instead. */ }
@@ -91,7 +107,7 @@ export async function POST(request: Request) {
       const whole = new Uint8Array(size);
       let offset = 0;
       for (const chunk of chunks) { whole.set(chunk, offset); offset += chunk.length; }
-      await voiceCache.put(id, whole).catch(() => {});
+      if (!personal) await voiceCache.put(id, whole).catch(() => {});
       try { visitor?.close(); } catch { /* The visitor already left. */ }
       return whole;
     } catch (error) {

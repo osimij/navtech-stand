@@ -1,5 +1,5 @@
 export type GameContext = {
-  phase: 'welcome' | 'quiz' | 'result' | 'contact' | 'success';
+  phase: 'welcome' | 'name' | 'hello' | 'quiz' | 'result' | 'contact' | 'success';
   step: number; answers: number[]; selected: number | null; interest: string;
 };
 type Catalog = Pick<typeof import('./quiz'), 'questions' | 'profiles' | 'scoreAnswers' | 'interestLabels'>;
@@ -8,14 +8,14 @@ export function createGameGuide(catalog: Catalog) {
   function parse(value: unknown): GameContext | null {
     if (!value || typeof value !== 'object') return null;
     const v = value as Partial<GameContext>;
-    if (!['welcome','quiz','result','contact','success'].includes(v.phase || '') || !Number.isInteger(v.step) || v.step! < 0 || v.step! >= catalog.questions.length || !Array.isArray(v.answers) || v.answers.length > catalog.questions.length || v.answers.some(a => !Number.isInteger(a) || a < 0 || a > 3) || (v.selected !== null && (!Number.isInteger(v.selected) || v.selected! < 0 || v.selected! > 3))) return null;
+    if (!['welcome','name','hello','quiz','result','contact','success'].includes(v.phase || '') || !Number.isInteger(v.step) || v.step! < 0 || v.step! >= catalog.questions.length || !Array.isArray(v.answers) || v.answers.length > catalog.questions.length || v.answers.some(a => !Number.isInteger(a) || a < 0 || a > 3) || (v.selected !== null && (!Number.isInteger(v.selected) || v.selected! < 0 || v.selected! > 3))) return null;
     if (['result','contact','success'].includes(v.phase!) && v.answers.length !== catalog.questions.length) return null;
     return { phase: v.phase!, step: v.step!, answers: [...v.answers], selected: v.selected!, interest: typeof v.interest === 'string' && Object.hasOwn(catalog.interestLabels, v.interest) ? v.interest : '' };
   }
   function cue(game: GameContext, previous: GameContext | null, language: 'ru'|'en' = 'ru') {
     const changedScreen = !previous || game.phase !== previous.phase || game.step !== previous.step;
     const prefix = 'Current touch-screen state. Keep the conversation language, translating screen text if needed. Use these facts when relevant; do not interrupt. ';
-    if (game.phase === 'welcome') return { speak: false, text: prefix + 'Welcome screen. The game has not started.' };
+    if (game.phase === 'welcome' || game.phase === 'name' || game.phase === 'hello') return { speak: false, text: prefix + 'Welcome screen. The game has not started.' };
     if (game.phase === 'quiz') {
       const original = catalog.questions[game.step];
       const question = language==='en' ? {...original,title:original.en,options:original.options.map(o=>({...o,text:o.en}))} : original;

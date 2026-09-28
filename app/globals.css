@@ -565,6 +565,103 @@ p { line-height: 1.65; }
 @media(max-width:1099px) and (min-width:761px) { .question-bar { grid-template-columns: 44px auto 44px; gap: 12px; width: auto; } .question-bar .question-nav { width: 44px; padding: 0; justify-content: center; } .question-bar .question-nav-label { display: none; } .question-progress { gap: 5px; } .question-progress>span { width: 18px; } .question-progress>.is-current { width: 28px; } }
 @media(max-width:760px) { .masthead:has(.masthead-center) { grid-template-columns: auto 1fr; } .masthead-center { grid-column: 1 / -1; grid-row: 2; padding-bottom: 8px; } .question-bar { width: 100%; } .navi-caption { display: none; } .question-option { min-height: 68px; padding: 14px 18px; border-radius: 18px; } .question-option strong { font-size: 17px; } .question-progress { gap: 4px; } .question-progress>span { width: 12px; } .question-progress>.is-current { width: 22px; } }
 
+/* Onboarding field: one capsule with its round action inside, like a message composer. The name step centres it
+   under Navi; the request steps set it on the right of the stage. */
+.intro-field { flex-direction: column; align-items: center; gap: 0; width: min(100%,560px); margin-inline: auto; }
+.intro-field .focus-hint { text-align: center; }
+.focus-field { --field-h: clamp(64px,8.4vh,76px); display: flex; align-items: center; gap: 10px; width: 100%; max-width: 560px; height: var(--field-h); padding: 0 8px 0 clamp(22px,2.6vh,30px);
+  border-radius: 999px; background: rgb(255 255 255 / .92); box-shadow: inset 0 0 0 1px rgb(22 26 32 / .14), 0 1px 1px rgb(22 26 32 / .04), 0 18px 40px -24px rgb(40 48 70 / .45); transition: box-shadow .2s; }
+.focus-field:focus-within { box-shadow: inset 0 0 0 1px #82bce0, 0 0 0 4px rgb(130 188 224 / .35), 0 18px 40px -24px rgb(40 48 70 / .45); }
+.focus-field input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: none; color: #15171a; font: inherit; font-size: clamp(20px,2.6vh,26px); outline: none; }
+.focus-field input::placeholder { color: #8a919b; font-size: .8em; }
+.focus-go { display: grid; place-items: center; flex: none; width: calc(var(--field-h) - 16px); height: calc(var(--field-h) - 16px); padding: 0; border: 0; border-radius: 50%; background: #15171a; color: #fff; transition: background-color .2s, transform .25s cubic-bezier(.2,.8,.3,1); }
+.focus-go:hover:not(:disabled) { background: #343434; }
+.focus-go:active:not(:disabled) { transform: scale(.94); }
+.focus-go:disabled { background: #d6d8dc; cursor: default; }
+.focus-hint { min-height: 1.5em; margin: 12px 0 0; color: #88342c; font-size: 15px; line-height: 1.5; }
+.quiet-action { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: none; color: #5b6470; font: inherit; font-size: 15px; transition: color .2s, background-color .2s; }
+.quiet-action:hover { color: #15171a; background: rgb(22 26 32 / .05); }
+.focus-go:focus-visible,.quiet-action:focus-visible,.topic-option:focus-visible,.offer-action:focus-visible,.focus-action:focus-visible { outline: 3px solid #82bce0; outline-offset: 3px; }
+
+/* The test and the request: Navi large on the left, travelling with the visitor; the one question or field on the
+   right. The stage is centred on the whole screen height, as if the header were not there. */
+.career-shell .booth-grid.phase-quiz,.career-shell .booth-grid.phase-contact,.career-shell .booth-grid.phase-success { display: flex; width: min(calc(100% - 72px),1360px); margin-top: 0; }
+.phase-quiz .play-panel,.phase-contact .play-panel,.phase-success .play-panel { display: flex; flex-direction: column; justify-content: flex-start; padding: 0; }
+.stage { --stage-navi: min(clamp(220px,36vw,600px),calc(100svh - 190px)); flex: 1; display: grid; grid-template-columns: minmax(0,.76fr) minmax(0,1.24fr); align-items: center; column-gap: clamp(24px,4vw,72px); padding: 0 0 clamp(64px,9vh,92px); }
+.stage-navi { position: relative; justify-self: center; width: min(100%,var(--stage-navi)); aspect-ratio: 1; }
+.stage-navi .mascot { width: 100%; height: 100%; }
+.stage-navi .navi-caption { top: auto; bottom: 0; left: 50%; max-width: min(360px,92%); border-radius: 18px; text-align: center; transform: translate(-50%,40%); }
+.stage-content { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.stage .question { display: block; flex: none; width: 100%; padding: 0; }
+.stage .question-title { max-width: none; margin: 0; font-size: clamp(26px,min(2.3vw,4.2vh),42px); text-align: left; }
+.stage .question-options { width: 100%; grid-template-columns: 1fr 1fr; gap: clamp(10px,1.4vh,16px); margin: clamp(20px,3.6vh,36px) 0 0; }
+.stage .question-option { position: relative; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: clamp(12px,1.8vh,18px); min-height: clamp(150px,21vh,236px); padding: clamp(16px,2.2vh,26px); border-radius: 26px; }
+.stage .question-option strong { margin-bottom: 6px; }
+.stage .question-option>svg { position: absolute; top: clamp(16px,2.2vh,26px); right: clamp(16px,2.2vh,26px); }
+
+/* The request: a heading, at most one line beneath it, then one field or one choice. */
+.focus-step { display: flex; flex-direction: column; align-items: flex-start; width: min(100%,640px); }
+.focus-step>* { animation: intro-rise .6s cubic-bezier(.16,1,.3,1) both; }
+.focus-step>:nth-child(2) { animation-delay: .06s; }
+.focus-step>:nth-child(3) { animation-delay: .12s; }
+.focus-step>:nth-child(n+4) { animation-delay: .18s; }
+.focus-title { margin: 0; color: #15171a; font-size: clamp(30px,min(3vw,5.4vh),56px); font-weight: 550; line-height: 1.08; letter-spacing: 0; text-wrap: balance; outline: none; }
+.focus-sub { margin: clamp(8px,1.4vh,14px) 0 0; color: #5b6470; font-size: clamp(17px,2.2vh,22px); line-height: 1.45; }
+.focus-step .focus-field { margin-top: clamp(24px,4.4vh,44px); }
+.topic-options { display: grid; gap: clamp(10px,1.4vh,14px); width: 100%; max-width: 560px; margin-top: clamp(24px,4.4vh,44px); }
+.topic-option { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: clamp(64px,8.4vh,76px); padding: 0 clamp(22px,2.6vh,30px); border: 1px solid rgb(22 26 32 / .1); border-radius: 999px;
+  background: rgb(255 255 255 / .85); color: #15171a; font: inherit; font-size: clamp(18px,2.3vh,22px); text-align: left; transition: background-color .2s, border-color .2s, color .2s, opacity .2s, transform .25s cubic-bezier(.2,.8,.3,1); }
+.topic-option:hover { border-color: rgb(22 26 32 / .24); background: #fff; }
+.topic-option:active { transform: scale(.985); }
+.topic-option:disabled { cursor: default; }
+.topic-option[aria-pressed=true] { border-color: #15171a; background: #15171a; color: #fff; }
+.topic-options:has([aria-pressed=true]:disabled) .topic-option:not([aria-pressed=true]) { opacity: .4; }
+.request-summary { display: grid; width: 100%; max-width: 560px; margin: clamp(18px,3.2vh,32px) 0 0; }
+.request-summary>div { display: grid; grid-template-columns: 7em minmax(0,1fr); gap: 16px; align-items: baseline; padding: clamp(10px,1.5vh,14px) 0; border-top: 1px solid rgb(22 26 32 / .08); }
+.request-summary>div:first-child { border-top: 0; }
+.request-summary dt { color: #6a717b; font-size: 15px; }
+.request-summary dd { margin: 0; color: #15171a; font-size: clamp(17px,2.1vh,20px); line-height: 1.35; overflow-wrap: anywhere; }
+.focus-step .company-details { width: 100%; max-width: 560px; margin-top: 4px; }
+.focus-step .company-details .form-field input { border-radius: 999px; background: rgb(22 26 32 / .045); border-color: transparent; }
+.focus-step .consent-label { max-width: 560px; margin-top: clamp(10px,1.8vh,18px); font-size: 13px; font-family: var(--font-small); line-height: 1.55; }
+.focus-step .flow-error { max-width: 560px; }
+.focus-action.primary-button { min-height: clamp(56px,7.4vh,64px); margin-top: clamp(20px,3.4vh,32px); padding: 0 28px 0 32px !important; font-size: clamp(17px,2.2vh,19px) !important; }
+.success-step .success-icon { width: clamp(64px,9vh,84px); height: clamp(64px,9vh,84px); margin: 0 0 clamp(16px,2.8vh,28px); border-radius: 30%; background: linear-gradient(155deg,#fff,#eef1f4); color: #15171a; box-shadow: inset 0 0 0 1px rgb(22 26 32 / .08), 0 24px 48px -28px rgb(30 40 60 / .45); }
+.success-step .success-icon svg { width: 44%; height: 44%; }
+.success-step .fine-print { margin-top: 14px; font-size: 12px; font-family: var(--font-small); color: #7a818b; }
+
+/* On the result Navi asks one question from its corner: one row beside it, the question and its answer, clear of the
+   board above. The Prism line moves to the right to make room. Where the row has no room, the same action joins the
+   bottom line instead. */
+.navi-offer { position: absolute; left: calc(100% + 12px); top: 50%; width: max-content; max-width: min(640px,calc(100vw - 560px)); display: flex; align-items: center; gap: 16px; padding: 6px 6px 6px 20px;
+  border-radius: 28px 28px 28px 8px; background: #fff; box-shadow: 0 0 0 1px rgb(22 26 32 / .06), 0 18px 40px -22px rgb(40 48 70 / .45); transform: translateY(-50%); animation: offer-in .7s cubic-bezier(.16,1,.3,1) 1.6s both; }
+.navi-offer p { margin: 0; color: #15171a; font-size: 16px; line-height: 1.35; text-wrap: balance; }
+.offer-action { display: inline-flex; flex: none; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px 0 20px; border: 0; border-radius: 999px; background: #15171a; color: #fff; font: inherit; font-size: 15px; white-space: nowrap; transition: background-color .2s; }
+.offer-action:hover { background: #343434; }
+@keyframes offer-in { from { opacity: 0; transform: translate(-8px,-50%) scale(.96); } }
+.prism-ribbon>.ribbon-request { display: none; }
+@media(min-width:1180px) {
+  .state-result .prism-ribbon { justify-content: flex-end; padding-right: max(36px,calc((100vw - 1360px) / 2)); }
+  .career-shell:has(.result-save-notice) .prism-ribbon>a { visibility: hidden; }
+}
+@media(max-width:1179px) { .navi-offer { display: none; } .prism-ribbon>.ribbon-request { display: inline-flex; } }
+
+@media(max-width:959px) {
+  .career-shell .booth-grid.phase-quiz,.career-shell .booth-grid.phase-contact,.career-shell .booth-grid.phase-success { width: min(calc(100% - 32px),720px); }
+  .stage { grid-template-columns: 1fr; align-content: start; row-gap: 12px; padding: 8px 0 40px; }
+  .stage-navi { width: clamp(96px,16vh,150px); }
+  .stage-navi .navi-caption { display: none; }
+  .stage .question-title { text-align: center; }
+  .focus-step { align-items: center; margin-inline: auto; text-align: center; }
+  .request-summary { text-align: left; }
+}
+@media(max-width:640px) {
+  .stage .question-options { grid-template-columns: 1fr; }
+  .stage .question-option { flex-direction: row; align-items: center; min-height: 68px; padding: 14px 18px; border-radius: 18px; }
+  .stage .question-option>svg { position: static; }
+  .request-summary>div { grid-template-columns: 1fr; gap: 2px; }
+}
+
 /* Ambient edge light: warm, desaturated colour drifting slowly around the frame. A blurred white centre gives it a
    natural falloff and rounded corners, keeps it out of the reading area, and it dims once the questions begin.
    The global reduced-motion rule leaves it still. */

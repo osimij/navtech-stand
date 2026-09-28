@@ -8,6 +8,7 @@ import {speechRequest,voiceListRequest,parseVoiceList,providerFailure,pcmWav} fr
 import {createGameGuide} from './live-game.ts';
 import {questions,profiles,scoreAnswers,interestLabels} from './quiz.ts';
 import {narrationText} from './narration-text.ts';
+import {visitorName} from './visitor-name.ts';
 const guide=createGameGuide({questions,profiles,scoreAnswers,interestLabels});
 const hosts=new Set(['localhost:5173','127.0.0.1:5173']);
 export function trustedVoiceRequest(request:Pick<IncomingMessage,'headers'|'method'>){
@@ -71,17 +72,20 @@ export function createVoiceLab(root:string,fetcher:typeof fetch=fetch){
    if(url.pathname!=='/api/voice-lab/speech'||req.method!=='POST'){json(res,404,{error:'Not found.'});return;}
    const data=await body(req), selection=parseVoiceSelection(data.selection),model=modelById(selection?.model),lang=data.language;
    if(!selection||!model||model.kind!=='tts'||!['ru','en'].includes(lang)){json(res,400,{error:'Invalid voice selection.'});return;}
-   let text:string;
+   let text:string,personal=false;
    if(data.sample&&Object.hasOwn(auditionTexts,data.sample))text=auditionTexts[data.sample as keyof typeof auditionTexts][lang as 'ru'|'en'];
    else {
     const game=guide.parse(data.game),cue=data.cue??'screen',variant=data.variant??0;
     if(!game||!['screen','tap'].includes(cue)||!Number.isInteger(variant)||variant<0||variant>2){json(res,400,{error:'Invalid narration cue.'});return;}
+    // A line with the visitor's name is spoken once and never written to the cache.
     text=narrationText(game,lang,cue,variant);
+    const name=visitorName(data.name);
+    if(name){const named=narrationText(game,lang,cue,variant,name);personal=named!==text;text=named;}
    }
    const request=speechRequest(selection,lang,text,keys[model.provider]);
    // Versioned synthesis settings, text and provider/voice all participate in the cache identity.
    const id=createHash('sha256').update(JSON.stringify({v:2,provider:model.provider,url:request.url,body:request.init.body})).digest('hex');
-   let cached:Buffer|undefined;try{cached=await readFile(resolve(cache,id+'.pcm'));}catch{}
+   let cached:Buffer|undefined;if(!personal)try{cached=await readFile(resolve(cache,id+'.pcm'));}catch{}
    const result={url:`/api/voice-lab/audio/${id}.wav`,text};
    if(cached){if(data.sample)json(res,200,{...result,cached:true,seconds:cached.length/48000});else{res.writeHead(200,{'Content-Type':'application/octet-stream','X-Navi-Text':encodeURIComponent(text),'X-Navi-Cache':'hit'});res.end(cached);}return;}
    if(!keys[model.provider]){json(res,503,{error:`Добавьте ${providerKeys[model.provider]} в .dev.vars / Provider key is missing.`});return;}
@@ -99,6 +103,7 @@ export function createVoiceLab(root:string,fetcher:typeof fetch=fetch){
     }
     if(!size||size%2)throw Error('invalid_pcm');
     if(abort.signal.aborted)return;
+    if(personal){res.end();return;}
     const pcm=Buffer.concat(chunks);await mkdir(cache,{recursive:true});await writeFile(resolve(cache,id+'.pcm'),pcm);
     if(data.sample)await writeFile(resolve(cache,id+'.json'),JSON.stringify({...result,cacheVersion:2,selection,language:lang,sample:data.sample,seconds:size/48000,cached:true}));
     if(data.sample)json(res,200,{...result,cached:false,seconds:size/48000});else res.end();

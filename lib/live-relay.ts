@@ -89,7 +89,7 @@ export function relayLive(client: WebSocket, connect: () => WebSocket, sessionFo
         if (data.type === 'session.updated' && !started) {
           started = true; clearTimeout(connectTimer); limit = setTimeout(close, 600000);
           sendClient({ type: 'session.started' });
-          if (!pendingAction && narration) pendingAction = game && game.phase !== 'welcome' ? 'Give one short observation about the current task in the selected language. The visitor answers only on the touchscreen. No introduction or request to speak.' : `Say only this short invitation: ${{ru:'Привет! Я Нави. Выберите близкий вам подход на экране — посмотрим, какие задачи вам интересны.',en:'Hi, I’m Navi. Choose your approach on the screen, and let’s explore the work that interests you.'}[language]}`;
+          if (!pendingAction && narration) pendingAction = game && !['welcome','name','hello'].includes(game.phase) ? 'Give one short observation about the current task in the selected language. The visitor answers only on the touchscreen. No introduction or request to speak.' : `Say only this short invitation: ${{ru:'Привет! Я Нави. Выберите близкий вам подход на экране — посмотрим, какие задачи вам интересны.',en:'Hi, I’m Navi. Choose your approach on the screen, and let’s explore the work that interests you.'}[language]}`;
           if (!pendingAction) pendingAction = demo ? `The visitor enabled voice. Say ONLY this short opening, then listen: ${{ru:'Привет! Что разберём в этом примере?',en:'Hi! What shall we explore in this example?',}[language]}` : game && game.phase !== 'welcome' ? 'The visitor tapped Navi during the game. Briefly offer help with the current screen, in the current conversation language. Do not restart the introduction.' : `The visitor tapped Navi to begin a conversation. Say only this short opening, then listen: ${{ru:'Привет! Я Нави. С чего начнём?',en:'Hi! I’m Navi. What shall we try?',}[language]}`;
           const action = pendingAction; pendingAction = ''; pendingScreen = false; respond(action,!demo); return;
         }
@@ -165,7 +165,7 @@ export function relayLive(client: WebSocket, connect: () => WebSocket, sessionFo
         game = next;
         if (started) sendProvider({ type: 'session.update', session: { type: 'realtime', instructions: instructions() } });
         // Contact entry needs quiet. Selections alone never trigger speech.
-        if (changed && !creativeMode && next.phase !== 'contact' && next.phase !== 'welcome') { pendingScreen = true; schedule(); }
+        if (changed && !creativeMode && !['contact','welcome','name','hello'].includes(next.phase)) { pendingScreen = true; schedule(); }
         else if (changed) pendingScreen = false;
       }
     } else if (event.type === 'playback' && typeof event.busy === 'boolean') {

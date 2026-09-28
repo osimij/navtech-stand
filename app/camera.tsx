@@ -56,7 +56,7 @@ const englishLabels:Record<string,string>={
 };
 
 export type CameraHandle={invite:()=>void;play:(action:CreativeAction)=>void;stop:()=>void;startNarration:(game:GameContext,language:InvitationLanguage)=>void};
-export default function CameraInvite({ref,idle,game,russianOnly=false,narration=false,voiceAllowed=true,controlledLanguage,onLanguageChange,onActivity,onGreeting,onMotion,onFace,onSpeech,onOpenChange}:{ref?:Ref<CameraHandle>;idle:boolean;game:GameContext;russianOnly?:boolean;narration?:boolean;voiceAllowed?:boolean;controlledLanguage?:InvitationLanguage;onLanguageChange?:(language:InvitationLanguage)=>void;onActivity?:()=>void;onGreeting:(text:string)=>void;onMotion?:(point:MotionPoint|null)=>void;onFace?:(point:MotionPoint|null)=>void;onSpeech?:(frame:SpeechFrame)=>void;onOpenChange?:(open:boolean)=>void}) {
+export default function CameraInvite({ref,idle,game,visitorName='',russianOnly=false,narration=false,voiceAllowed=true,controlledLanguage,onLanguageChange,onActivity,onGreeting,onMotion,onFace,onSpeech,onOpenChange}:{ref?:Ref<CameraHandle>;idle:boolean;game:GameContext;visitorName?:string;russianOnly?:boolean;narration?:boolean;voiceAllowed?:boolean;controlledLanguage?:InvitationLanguage;onLanguageChange?:(language:InvitationLanguage)=>void;onActivity?:()=>void;onGreeting:(text:string)=>void;onMotion?:(point:MotionPoint|null)=>void;onFace?:(point:MotionPoint|null)=>void;onSpeech?:(frame:SpeechFrame)=>void;onOpenChange?:(open:boolean)=>void}) {
   const video=useRef<HTMLVideoElement>(null), preview=useRef<HTMLVideoElement>(null),stream=useRef<MediaStream|null>(null);
   const requestId=useRef(0),gate=useRef(createArrivalGate()),pick=useRef(createShuffleBag<number>());
   const faceSeen=useRef(-Infinity),motionSeen=useRef(-Infinity),manualTime=useRef(-Infinity);
@@ -78,7 +78,7 @@ export default function CameraInvite({ref,idle,game,russianOnly=false,narration=
       'Живой разговор с Нави через микрофон.':['Нави говорит и реагирует на ответы на экране. Микрофон включается, только если разрешены ответы голосом.','Navi speaks and reacts to screen choices. The microphone is used only when answers by voice are on.'],
       'Начать разговор с Нави':['Включить голос Нави','Enable Navi’s voice'],
       'Поговорить с Нави':['Послушать Нави','Hear Navi'],
-      'Синтезированный голос ИИ. Аудио передаётся OpenAI только после включения разговора. Нави остаётся с вами во время игры. «Завершить» и «Следующий участник» заканчивают разговор. Максимум — 10 минут.':['Голос создан ИИ. Нави озвучивает только подготовленные реплики и шутки. Провайдер получает только текст реплики — без изображений и полей контакта. «Завершить» выключает голос.','AI-generated voice. Navi reads only approved lines and jokes. The provider receives only the spoken script, without images or contact fields. End stops the voice.'],
+      'Синтезированный голос ИИ. Аудио передаётся OpenAI только после включения разговора. Нави остаётся с вами во время игры. «Завершить» и «Следующий участник» заканчивают разговор. Максимум — 10 минут.':['Голос создан ИИ. Нави озвучивает только подготовленные реплики и шутки и обращается к гостю по имени, если тот его ввёл. Провайдер получает только текст реплики — с этим именем, но без изображений и полей контакта; реплики с именем стенд не сохраняет. «Завершить» выключает голос.','AI-generated voice. Navi reads only approved lines and jokes, and addresses the visitor by the first name they typed, if any. The provider receives only the spoken script — with that name, but without images or contact fields; the booth never stores lines with a name. End stops the voice.'],
       'Одно приветствие при подходе, с паузой не менее минуты. Нажатие на Нави включает разговор. Камера сама не включает микрофон. Видео остаётся на устройстве; личность не определяется.':['Камера управляет взглядом Нави и показывает приглашение. Видео остаётся на устройстве. Голос начинается после касания; камера не включает микрофон.','The camera guides Navi’s gaze and displays an invitation. Video stays on this device. Voice starts after a tap; the camera never turns on the microphone.'],
     };
     if(narration&&narrationLabels[value])return narrationLabels[value][language==='en'?1:0];
@@ -91,6 +91,9 @@ export default function CameraInvite({ref,idle,game,russianOnly=false,narration=
   const stopVoice=voice.stop;
   const updateGame=voice.updateGame;
   const startVoice=voice.start;
+  const setVoiceName=voice.setName;
+  // The name goes first, so a screen that greets the visitor by name already has it when its line is requested.
+  useEffect(()=>{setVoiceName(visitorName);},[visitorName,setVoiceName]);
   useEffect(()=>{updateGame(game);},[game,updateGame]);
   const faceStatus=useFaceTracking(enabled,settingsOpen,video,point=>{if(point)faceSeen.current=Date.now();latest.current.onFace?.(point);});
   const tracking=useRef(faceStatus);

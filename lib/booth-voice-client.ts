@@ -13,6 +13,8 @@ export function createBoothVoice(callbacks:Parameters<typeof createLiveVoice>[0]
    return useTts?tts.start(language,selection):live.start(language,action,options);
   },
   updateGame(game:GameContext){live.updateGame(game);tts.updateGame(game);},
+  // Scripted narration only: the Realtime conversation never receives the visitor's name.
+  setName(name:string){tts.setName?.(name);},
   updateDemo(demo:DemoContext){live.updateDemo(demo);},
   stop(){if(useTts)tts.stop();else live.stop();},
   greet(){if(useTts)tts.greet();else live.greet();},
