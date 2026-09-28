@@ -8,6 +8,7 @@ export const speechVoices = ['alloy','ash','ballad','coral','echo','fable','nova
 export const classicVoices = ['alloy','ash','coral','echo','fable','onyx','nova','sage','shimmer'];
 export const voiceModels: {id:string; provider:VoiceProvider; name:string; kind:'realtime'|'tts'; note:string; voices?:readonly string[]}[] = [
   {id:'eleven_multilingual_v2',provider:'elevenlabs',name:'Multilingual v2',kind:'tts',note:'Начните здесь: спокойная, связная речь. Подберите голос с родным русским акцентом.'},
+  {id:'eleven_v4_turbo',provider:'elevenlabs',name:'Eleven v4 Turbo',kind:'tts',note:'Голос стенда: быстрый ответ и живая интонация. Русский и английский.'},
   {id:'eleven_v3',provider:'elevenlabs',name:'Eleven v3',kind:'tts',note:'Больше выразительности. Проверьте, не звучит ли короткая реплика слишком театрально.'},
   {id:'eleven_flash_v2_5',provider:'elevenlabs',name:'Flash v2.5',kind:'tts',note:'Вариант для сравнения скорости и естественности на касаниях.'},
   {id:'sonic-3.6',provider:'cartesia',name:'Sonic 3.6',kind:'tts',note:'Кандидат для живой разговорной подачи. Голоса загружаются по выбранному языку.'},
@@ -33,16 +34,18 @@ export function parseVoiceSelection(value:unknown):VoiceSelection|null {
   if(model.voices ? !model.voices.includes(v.voice) : !/^[a-zA-Z0-9_-]{8,100}$/.test(v.voice))return null;
   return {model:model.id,voice:v.voice,name:typeof v.name==='string'?v.name.slice(0,100):v.voice};
 }
-export const siennaNarrator:VoiceSelection={model:'eleven_v3',voice:'oGZR5g7rlFABaB1ZfWkI',name:'Sienna'};
+export const siennaNarrator:VoiceSelection={model:'eleven_v4_turbo',voice:'oGZR5g7rlFABaB1ZfWkI',name:'Sienna'};
+// v2 since the booth moved to Eleven v4 Turbo (29 September): choices saved for the slower v3 no longer apply.
+const narratorKey=(language:VoiceLanguage)=>`navi-scripted-voice-v2-${language}`;
 export function savedNarrator(language:VoiceLanguage):VoiceSelection {
   // The scripted booth gets fresh preferences; historical Realtime choices
   // remain available to the separate conversation demo, never as a fallback.
-  try {const value=JSON.parse(localStorage.getItem(`navi-scripted-voice-v1-${language}`)||'null');const parsed=parseVoiceSelection(value);if(parsed&&modelById(parsed.model)?.kind==='tts')return parsed;}catch{}
+  try {const value=JSON.parse(localStorage.getItem(narratorKey(language))||'null');const parsed=parseVoiceSelection(value);if(parsed&&modelById(parsed.model)?.kind==='tts')return parsed;}catch{}
   return {...siennaNarrator};
 }
 export function narratorSnapshot(language:VoiceLanguage){return JSON.stringify(savedNarrator(language));}
 export const defaultNarratorSnapshot=JSON.stringify(siennaNarrator);
 export function saveNarrator(language:VoiceLanguage,selection:VoiceSelection){
   const valid=parseVoiceSelection(selection);if(!valid||modelById(valid.model)?.kind!=='tts')return;
-  try{localStorage.setItem(`navi-scripted-voice-v1-${language}`,JSON.stringify(valid));window.dispatchEvent(new Event('navi-voice-change'));}catch{}
+  try{localStorage.setItem(narratorKey(language),JSON.stringify(valid));window.dispatchEvent(new Event('navi-voice-change'));}catch{}
 }

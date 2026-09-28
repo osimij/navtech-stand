@@ -8,6 +8,7 @@ import { useLiveVoice } from "@/lib/use-live-voice";
 import { useVoicePreference, useNarratorPreference } from "@/lib/use-voice-preference";
 import { savedVoice } from "@/lib/voice-options";
 import { modelById } from "@/lib/voice-catalog";
+import { useVoiceAnswersSetting } from "@/lib/use-voice-answers";
 import type { CreativeAction } from "@/lib/live";
 import type { GameContext } from "@/lib/live-game";
 import type { SpeechFrame } from "@/lib/invitation-player";
@@ -66,6 +67,7 @@ export default function CameraInvite({ref,idle,game,russianOnly=false,narration=
   const language=controlledLanguage||localLanguage;
   const selectedVoice=useVoicePreference(language);
   const narrator=useNarratorPreference(language);
+  const [voiceAnswers,setVoiceAnswers]=useVoiceAnswersSetting(),[answersError,setAnswersError]=useState("");
   const text=(value:string)=>{
     const narrationLabels:Record<string,[string,string]>={
       'Завершить разговор':['Выключить голос','Turn voice off'],
@@ -73,11 +75,11 @@ export default function CameraInvite({ref,idle,game,russianOnly=false,narration=
       'Микрофон включён · можно говорить':['Голос включён · отвечайте на экране','Voice on · answer on screen'],
       'Микрофон включён. Можно говорить.':['Нави озвучивает подсказки.','Navi narrates the experience.'],
       'Завершаем разговор…':['Выключаем голос…','Turning voice off…'],
-      'Живой разговор с Нави через микрофон.':['Нави говорит и реагирует на ответы на экране. Микрофон не используется.','Navi speaks and reacts to screen choices. No microphone is used.'],
+      'Живой разговор с Нави через микрофон.':['Нави говорит и реагирует на ответы на экране. Микрофон включается, только если разрешены ответы голосом.','Navi speaks and reacts to screen choices. The microphone is used only when answers by voice are on.'],
       'Начать разговор с Нави':['Включить голос Нави','Enable Navi’s voice'],
       'Поговорить с Нави':['Послушать Нави','Hear Navi'],
-      'Синтезированный голос ИИ. Аудио передаётся OpenAI только после включения разговора. Нави остаётся с вами во время игры. «Завершить» и «Следующий участник» заканчивают разговор. Максимум — 10 минут.':['Голос создан ИИ. Нави озвучивает только подготовленные реплики и шутки. Провайдер получает только текст реплики — без микрофона, изображений и полей контакта. «Завершить» выключает голос.','AI-generated voice. Navi reads only approved lines and jokes. The provider receives only the spoken script, without microphone audio, images or contact fields. End stops the voice.'],
-      'Одно приветствие при подходе, с паузой не менее минуты. Нажатие на Нави включает разговор. Камера сама не включает микрофон. Видео остаётся на устройстве; личность не определяется.':['Камера управляет взглядом Нави и показывает приглашение. Видео остаётся на устройстве. Голос начинается после касания, микрофон не используется.','The camera guides Navi’s gaze and displays an invitation. Video stays on this device. Voice starts after a tap; no microphone is used.'],
+      'Синтезированный голос ИИ. Аудио передаётся OpenAI только после включения разговора. Нави остаётся с вами во время игры. «Завершить» и «Следующий участник» заканчивают разговор. Максимум — 10 минут.':['Голос создан ИИ. Нави озвучивает только подготовленные реплики и шутки. Провайдер получает только текст реплики — без изображений и полей контакта. «Завершить» выключает голос.','AI-generated voice. Navi reads only approved lines and jokes. The provider receives only the spoken script, without images or contact fields. End stops the voice.'],
+      'Одно приветствие при подходе, с паузой не менее минуты. Нажатие на Нави включает разговор. Камера сама не включает микрофон. Видео остаётся на устройстве; личность не определяется.':['Камера управляет взглядом Нави и показывает приглашение. Видео остаётся на устройстве. Голос начинается после касания; камера не включает микрофон.','The camera guides Navi’s gaze and displays an invitation. Video stays on this device. Voice starts after a tap; the camera never turns on the microphone.'],
     };
     if(narration&&narrationLabels[value])return narrationLabels[value][language==='en'?1:0];
     return language==='en'?(englishLabels[value]||value):value;
@@ -177,6 +179,8 @@ export default function CameraInvite({ref,idle,game,russianOnly=false,narration=
         {voice.playbackBlocked&&<Button variant="outline" onClick={voice.resumePlayback}>{text("Включить звук")}</Button>}
         <p className="voice-credit">{text("Синтезированный голос ИИ. Аудио передаётся OpenAI только после включения разговора. Нави остаётся с вами во время игры. «Завершить» и «Следующий участник» заканчивают разговор. Максимум — 10 минут.")}</p>
         {voice.error&&<p className="inline-error" role="alert">{voice.error}</p>}
+        {narration&&<div className="setting-row"><div><strong>{language==='en'?'Answers by voice':'Ответы голосом'}</strong><p>{language==='en'?'Visitors can say an answer instead of tapping it. The microphone works only on the questions and pauses while Navi speaks. ElevenLabs recognizes the speech; the booth keeps neither audio nor text.':'Гость может назвать ответ вслух вместо касания. Микрофон работает только на вопросах и молчит, пока говорит Нави. Речь распознаёт ElevenLabs; стенд не сохраняет ни звук, ни текст.'}</p></div><Switch aria-label={language==='en'?'Answers by voice':'Ответы голосом'} checked={voiceAnswers} onCheckedChange={value=>{setAnswersError('');void setVoiceAnswers(value).catch(()=>setAnswersError(language==='en'?'Microphone access is blocked. Allow it in the browser and try again.':'Нет доступа к микрофону. Разрешите его в браузере и попробуйте снова.'));}}/></div>}
+        {answersError&&<p className="inline-error" role="alert">{answersError}</p>}
         <div className="setting-row"><div><strong>{text("Встречать через камеру")}</strong><p>{text("Нави заметит лицо и пригласит в игру. После включения нажмите «Готово».")}</p></div><Switch aria-label={text("Включить камеру")} checked={enabled} disabled={busy} onCheckedChange={value=>value?void enableCamera():stopCamera()}/></div>
         <div className="setting-camera-state"><video ref={node=>{preview.current=node;if(node&&stream.current){node.srcObject=stream.current;void node.play().catch(()=>{});}}} muted playsInline className={enabled?'settings-preview':'hidden-preview'} aria-label={text("Предпросмотр камеры")}/><span role="status">{busy?text("Подключаем камеру…"):text(status)}</span></div>
         {enabled&&<p className="face-tracking-state" role="status">{faceStatus==='loading'?text("Готовим взгляд Нави…"):faceStatus==='ready'?text("Нави готов заметить гостя и следить за лицом."):faceStatus==='unavailable'?text("Положение лица недоступно. Реакции на движение и касания работают."):''}</p>}

@@ -6,6 +6,14 @@ type Callbacks={onState?:(s:LiveState)=>void;onSpeech?:(f:SpeechFrame)=>void;onC
 type Environment={context:()=>AudioContext;node:(c:AudioContext)=>AudioWorkletNode;fetch:typeof fetch};
 const browser:Environment={context:()=>new AudioContext({sampleRate:24000}),node:c=>new AudioWorkletNode(c,'navi-pcm',{numberOfInputs:0,numberOfOutputs:1,outputChannelCount:[1]}),fetch:(...args)=>fetch(...args)};
 type Run={context:AudioContext;node?:AudioWorkletNode;language:VoiceLanguage;selection:VoiceSelection;request?:AbortController;revision:number;ready:boolean;lastTap:number;taps:number;timer?:ReturnType<typeof setTimeout>};
+// Settings problems (no key, voice not allowed, exhausted credits, rejected key) persist, so the voice turns off with
+// the reason. Anything else (busy, network, a provider hiccup) skips only that line: the next screen speaks again.
+// Neither case retries automatically.
+class LineError extends Error{fatal:boolean;constructor(message:string,fatal:boolean){super(message);this.fatal=fatal;}}
+function lineFailure(status:number,data:{error?:string;code?:string;providerStatus?:number}){
+ const fatal=[400,403,503].includes(status)||Boolean(data.code&&data.code!=='provider_error')||[401,402,403].includes(data.providerStatus??0);
+ return new LineError(data.error||'Не удалось получить звук.',fatal);
+}
 export function createTtsNarration(callbacks:Callbacks={},env:Environment=browser){
  let run:Run|null=null,disposed=false,game:GameContext={phase:'welcome',step:0,answers:[],selected:null,interest:''};
  const silence=()=>callbacks.onSpeech?.({speaking:false,level:0});
@@ -21,7 +29,7 @@ export function createTtsNarration(callbacks:Callbacks={},env:Environment=browse
   try{
    const response=await env.fetch('/api/voice-lab/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({selection:r.selection,language:r.language,game,cue,variant}),signal:request.signal});
    if(!current())return;
-   if(!response.ok){const data=await response.json() as {error?:string};throw Error(data.error||'Не удалось получить звук.');}
+   if(!response.ok)throw lineFailure(response.status,await response.json().catch(()=>({})) as Parameters<typeof lineFailure>[1]);
    if(!response.body)throw Error('Пустой аудиопоток.');
    callbacks.onCaption?.(decodeURIComponent(response.headers.get('X-Navi-Text')||''));
    const reader=response.body.getReader();let carry=new Uint8Array(0),received=0;
@@ -32,7 +40,11 @@ export function createTtsNarration(callbacks:Callbacks={},env:Environment=browse
     if(length){const buffer=joined.slice(0,length).buffer;r.node?.port.postMessage({type:'audio',buffer},[buffer]);received+=length;}
    }
    if(current()&&(!received||carry.length))throw Error('Некорректный аудиопоток.');
-  }catch(error){if(current())stop(error instanceof Error?error.message:'Не удалось получить звук.');}
+  }catch(error){
+   if(!current())return;
+   if(error instanceof LineError&&error.fatal)stop(error.message);
+   else callbacks.onDiagnostic?.('tts.line_skipped',{cue});
+  }
  }
  async function start(language:VoiceLanguage,selection:VoiceSelection){
   if(run||disposed)return;

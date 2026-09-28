@@ -2,6 +2,8 @@
 // first (lib/voice-lab-server.ts). Same contract as there: approved lines only, raw 24 kHz PCM streamed back.
 // A public URL gets two extra guards. Only the booth narrator voice is accepted, and each line is cached in the
 // database after its first synthesis, so the total provider cost is bounded by the finite set of approved lines.
+// `node scripts/warm-narration.mjs <site URL>` synthesizes every approved line once, so visitors only get cached audio.
+import { after } from "next/server";
 import { setting, voiceCache } from "@/lib/platform";
 import { body, json, sameOrigin } from "@/lib/server";
 import { createGameGuide } from "@/lib/live-game";
@@ -14,7 +16,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const guide = createGameGuide({ questions, profiles, scoreAnswers, interestLabels });
-const pending = new Set<string>();
+// Lines being synthesized by this instance. A second request for the same line waits for it instead of paying twice.
+const inflight = new Map<string, Promise<Uint8Array | null>>();
 
 async function digest(value: string) {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
@@ -46,47 +49,56 @@ export async function POST(request: Request) {
     if (cached) return pcm(cached as Uint8Array<ArrayBuffer>, text, "hit");
   } catch { /* A cache outage should not silence the booth; synthesize instead. */ }
   if (!key) return json({ error: language === "en" ? "Narration is not configured on this site." : "Голос на сайте не настроен." }, 503);
-  if (pending.has(id)) return json({ error: "Please wait for the current line." }, 429);
+  const running = inflight.get(id);
+  if (running) {
+    const audio = await running;
+    return audio ? pcm(audio as Uint8Array<ArrayBuffer>, text, "hit") : json({ error: "Не удалось получить звук. / Could not generate audio." }, 502);
+  }
 
-  pending.add(id);
+  let finish!: (audio: Uint8Array | null) => void;
+  inflight.set(id, new Promise(resolve => { finish = audio => { inflight.delete(id); resolve(audio); }; }));
   let upstream: Response;
   try {
     upstream = await fetch(provider.url, { ...provider.init, signal: AbortSignal.timeout(45000) });
   } catch {
-    pending.delete(id);
+    finish(null);
     return json({ error: "Не удалось получить звук. / Could not generate audio." }, 502);
   }
   if (!upstream.ok || !upstream.body || upstream.headers.get("Content-Type")?.includes("json")) {
-    pending.delete(id);
+    finish(null);
     return json(await providerFailure(upstream, language), 502);
   }
+
   // Stream to the visitor as it arrives; keep a copy and store the whole line once it is complete and valid.
-  const reader = upstream.body.getReader(), chunks: Uint8Array[] = [];
-  let size = 0, listening = true;
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      try {
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          size += value.length;
-          if (size > 1440000) throw Error("audio_too_long");
-          chunks.push(value);
-          if (listening) try { controller.enqueue(value); } catch { listening = false; }
-        }
-        if (!size || size % 2) throw Error("invalid_pcm");
-        const whole = new Uint8Array(size);
-        let offset = 0;
-        for (const chunk of chunks) { whole.set(chunk, offset); offset += chunk.length; }
-        await voiceCache.put(id, whole).catch(() => {});
-        if (listening) controller.close();
-      } catch (error) {
-        if (listening) controller.error(error);
-      } finally {
-        pending.delete(id);
+  // Reading continues after the visitor moves on (the fetch is aborted mid-line), and `after` keeps the function
+  // alive until the line is stored, so an interrupted line is still paid for only once.
+  let visitor = null as ReadableStreamDefaultController<Uint8Array> | null;
+  const stream = new ReadableStream<Uint8Array>({ start(controller) { visitor = controller; }, cancel() { visitor = null; } });
+  const reader = upstream.body.getReader();
+  const synthesis = (async () => {
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.length;
+        if (size > 1440000) throw Error("audio_too_long");
+        chunks.push(value);
+        try { visitor?.enqueue(value); } catch { visitor = null; }
       }
-    },
-    cancel() { listening = false; },
-  });
+      if (!size || size % 2) throw Error("invalid_pcm");
+      const whole = new Uint8Array(size);
+      let offset = 0;
+      for (const chunk of chunks) { whole.set(chunk, offset); offset += chunk.length; }
+      await voiceCache.put(id, whole).catch(() => {});
+      try { visitor?.close(); } catch { /* The visitor already left. */ }
+      return whole;
+    } catch (error) {
+      try { visitor?.error(error); } catch { /* The visitor already left. */ }
+      return null;
+    }
+  })().then(finish);
+  after(synthesis);
   return pcm(stream, text, "miss");
 }

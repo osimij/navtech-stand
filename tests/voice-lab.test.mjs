@@ -16,7 +16,7 @@ const game={phase:'quiz',step:0,answers:[],selected:null,interest:''};
 const tick=()=>new Promise(r=>setImmediate(r));
 
 test('explicit provider/model/voice allowlist covers different generations',()=>{
- assert.equal(voiceModels.length,10);
+ assert.equal(voiceModels.length,11);
  assert.ok(parseVoiceSelection(selection));assert.equal(parseVoiceSelection({...selection,voice:'marin'}),null);
  assert.equal(parseVoiceSelection({...selection,model:'invented-model'}),null);
  assert.equal(parseVoiceSelection({model:'eleven_v3',voice:'../../secrets',name:'x'}),null);
@@ -83,6 +83,22 @@ test('screen changes abort old TTS and discard late audio; stopping clears playb
  pending[0].resolve(new Response(new Uint8Array([1,2])));await tick();assert.equal(f.nodes[0].port.messages.filter(m=>m.type==='audio').length,0);
  pending[1].resolve(new Response(new Uint8Array([3,4])));await tick();assert.equal(f.nodes[0].port.messages.filter(m=>m.type==='audio').length,1);
  f.voice.stop();assert.equal(f.states.at(-1).phase,'idle');f.voice.dispose();
+});
+
+test('a passing provider or network failure skips one line and keeps narration on, without retrying',async()=>{
+ const replies=[()=>Response.json({error:'x',code:'provider_error',providerStatus:500},{status:502}),()=>new Response('<html>timeout</html>',{status:504}),()=>Promise.reject(new TypeError('network')),()=>new Response(new Uint8Array([5,6]))];
+ const calls=[];const f=clientFixture(async(_url,options)=>{calls.push(options);return replies[calls.length-1]();});
+ f.voice.updateGame(game);await f.voice.start('ru',selection);await tick();
+ for(let step=1;step<4;step++){f.voice.updateGame({...game,step,answers:Array(step).fill(0)});await tick();}
+ assert.equal(calls.length,4);assert.ok(f.states.every(s=>s.phase!=='error'));assert.equal(f.states.at(-1).phase,'ready');
+ assert.equal(f.nodes[0].port.messages.filter(m=>m.type==='audio').length,1);f.voice.dispose();
+});
+test('missing key, rejected voice and exhausted credits turn narration off with the reason',async()=>{
+ for(const [status,body] of [[503,{error:'Голос на сайте не настроен.'}],[403,{error:'Только голос стенда.'}],[502,{error:'Закончились кредиты.',code:'insufficient_credits',providerStatus:429}],[502,{error:'Ключ не принят.',code:'provider_error',providerStatus:401}]]){
+  const f=clientFixture(async()=>Response.json(body,{status}));
+  await f.voice.start('ru',selection);await tick();
+  assert.equal(f.states.at(-1).phase,'error');assert.equal(f.states.at(-1).error,body.error);f.voice.dispose();
+ }
 });
 
 test('paid-plan failures explain the restriction in either language without leaking upstream text',async()=>{

@@ -9,6 +9,7 @@ type Sample={url:string;seconds?:number;cached?:boolean};
 type Providers=Record<VoiceProvider,boolean>;
 const englishNotes:Record<string,string>={
  eleven_multilingual_v2:'Start here: steady, expressive speech. Choose a voice native to the target language.',
+ eleven_v4_turbo:'Booth voice: fast response with lively intonation. Russian and English.',
  eleven_v3:'More expressive. Listen for warmth without theatrical delivery.',
  eleven_flash_v2_5:'Compare responsiveness and natural delivery during touch interactions.',
  'sonic-3.6':'A candidate for conversational pacing. Load voices for the selected language.',
