@@ -42,6 +42,14 @@ Cloudflare one for the stand. The two databases are separate: the event records 
 To check the voice at any time, the first line of a run reports `cached` or `generated`; a `503 Голос на сайте не
 настроен` means the deployment has no `ELEVENLABS_API_KEY`.
 
+## The booth screen
+
+The booth's 32" Android touch panel opens the hosted site in Chrome. It picks the lite rendering tier on its own (MASCOT.md,
+«smooth on the booth's low-power panel»). To check it on the panel, open the site once with `?perf=1`: a small readout in
+the lower-left corner shows the tier, frames per second, how often Navi is drawn and its resolution. `?perf=0` hides it
+again. `?navi=lite`, `?navi=full` and `?navi=auto` (the default) override the tier on that device only; the choice is
+remembered in its browser.
+
 ## What the hosted site protects
 
 - Narration speaks only the approved lines in `lib/narration-text.ts`, only in the booth voice (Sienna), and each line is

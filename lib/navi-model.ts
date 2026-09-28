@@ -4,6 +4,8 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import type { NaviPose } from './navi-rig';
+import type { NaviQuality } from './navi-quality';
+import { createToqi, TOQI_RIM } from './navi-toqi';
 
 const DEPTH = .9;          // front-to-back flattening of the pebble
 const BOTTOM = -.94;       // lowest point of the body
@@ -29,13 +31,14 @@ const profile = (() => {
   return points;
 })();
 
+// The profile rises monotonically, so a binary search finds the segment: the mouth and brows ask hundreds of times a
+// frame while Navi speaks.
 function radiusAt(y: number) {
-  if (y <= profile[0].y) return 0;
-  for (let i = 1; i < profile.length; i++) {
-    const a = profile[i - 1], b = profile[i];
-    if (y <= b.y) return a.x + (b.x - a.x) * (y - a.y) / (b.y - a.y);
-  }
-  return 0;
+  if (y <= profile[0].y || y > profile[profile.length - 1].y) return 0;
+  let lo = 0, hi = profile.length - 1;
+  while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (profile[mid].y < y) lo = mid; else hi = mid; }
+  const a = profile[lo], b = profile[hi];
+  return a.x + (b.x - a.x) * (y - a.y) / (b.y - a.y);
 }
 /** The front surface point of the body at (x, y). */
 export function surfacePoint(x: number, y: number, lift = 0) {
@@ -64,17 +67,21 @@ const mix = (a: THREE.Color, b: THREE.Color, t: number) => a.clone().lerp(b, Mat
 const smooth = (a: number, b: number, v: number) => { const t = Math.min(1, Math.max(0, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 // Porcelain with a soft rim of light. The rim takes the page's ambient colour, so Navi is lit by the room it is in.
-// On the body, a soft occlusion ring around each eye opening seats the eyes in the face instead of on it.
+// On the body, a soft occlusion ring around each eye opening seats the eyes in the face instead of on it, and a soft
+// shade just under the toqi's rim (capY) sits the cap on the head.
 type Socket = { center: THREE.Vector3; radius: THREE.Vector2 };
-function porcelain(rim: { value: THREE.Color }, sockets: Socket[] = []) {
+function porcelain(rim: { value: THREE.Color }, sockets: Socket[] = [], capY?: number) {
   const material = new THREE.MeshPhysicalMaterial({
     vertexColors: true, roughness: .36, clearcoat: .55, clearcoatRoughness: .28,
     sheen: .6, sheenRoughness: .45, sheenColor: linear('#e4ecff'), envMapIntensity: .95,
   });
   material.onBeforeCompile = shader => {
     shader.uniforms.naviRim = rim;
-    const occlusion = sockets.map(({ center: c, radius: r }) => `naviSocket(vNaviP, vec2(${c.x.toFixed(4)}, ${c.y.toFixed(4)}), vec2(${r.x.toFixed(4)}, ${r.y.toFixed(4)}))`).join(' * ');
-    if (sockets.length) {
+    const occlusion = [
+      ...sockets.map(({ center: c, radius: r }) => `naviSocket(vNaviP, vec2(${c.x.toFixed(4)}, ${c.y.toFixed(4)}), vec2(${r.x.toFixed(4)}, ${r.y.toFixed(4)}))`),
+      ...capY === undefined ? [] : [`(1.0 - .3 * exp(-pow(max(${capY.toFixed(4)} - vNaviP.y, 0.0) / .065, 2.0)))`],
+    ].join(' * ');
+    if (occlusion) {
       shader.vertexShader = shader.vertexShader
         .replace('#include <common>', '#include <common>\nvarying vec3 vNaviP;')
         .replace('#include <begin_vertex>', '#include <begin_vertex>\nvNaviP = position;');
@@ -95,6 +102,8 @@ function porcelain(rim: { value: THREE.Color }, sockets: Socket[] = []) {
         outgoingLight += naviRim * pow(1.0 - naviFacing, 2.6);
         #include <opaque_fragment>`);
   };
+  // Programs are cached by the onBeforeCompile source, which every variant shares.
+  material.customProgramCacheKey = () => `navi-porcelain-${sockets.length}-${capY ?? 'bare'}`;
   return material;
 }
 
@@ -141,7 +150,7 @@ function eyeball(uniforms: Record<string, THREE.IUniform>) {
 // A small photo studio that exists only in Navi's eyes: a rounded softbox up and to the right (where the key light
 // is), a narrow strip light low on the left and a dim graded room. The eyes reflect this, so catchlights are crisp,
 // designed shapes that bend over the cornea, not painted dots.
-function eyeStudio(pmrem: THREE.PMREMGenerator) {
+function eyeStudio(pmrem: THREE.PMREMGenerator, size: number) {
   const scene = new THREE.Scene();
   const dome = new THREE.Mesh(paint(new THREE.SphereGeometry(20, 48, 24), p => {
     const y = p.y / 20;
@@ -166,7 +175,7 @@ function eyeStudio(pmrem: THREE.PMREMGenerator) {
   };
   panel(new THREE.Vector3(.18, .37, .91), 6.9, 3.5, 1.45, 46);  // key softbox
   panel(new THREE.Vector3(-.36, -.36, .86), 2.8, .9, .45, 14);  // fill strip
-  const texture = pmrem.fromScene(scene, 0, .1, 60).texture;
+  const texture = pmrem.fromScene(scene, 0, .1, 60, { size }).texture;
   scene.traverse(object => { if (object instanceof THREE.Mesh) { object.geometry.dispose(); (object.material as THREE.Material).dispose(); } });
   textures.forEach(texture => texture.dispose());
   return texture;
@@ -203,8 +212,16 @@ function cornea(studio: THREE.Texture, uniforms: Record<string, THREE.IUniform>)
 
 type Eye = { ball: THREE.Group; pivot: THREE.Group; upper: THREE.Group; lower: THREE.Group; closed: THREE.Mesh; uniforms: { uGaze: { value: THREE.Matrix3 }; uLid: { value: number }; uLower: { value: number }; uPupil: { value: number } } };
 
-export function createNaviModel(canvas: HTMLCanvasElement) {
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+/**
+ * `quality` receives the GPU's name and picks the tier: 'lite' (lib/navi-quality.ts) draws the same character with
+ * smaller light maps and without the clear-coat and sheen layers. A software-only WebGL fails here on purpose, so the
+ * seats fall back to the sprite instead of a slideshow.
+ */
+export function createNaviModel(canvas: HTMLCanvasElement, options: { quality?: (gpu: string) => NaviQuality } = {}) {
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: true });
+  const gl = renderer.getContext(), gpuInfo = gl.getExtension('WEBGL_debug_renderer_info');
+  let quality: NaviQuality = options.quality?.(String(gl.getParameter(gpuInfo ? gpuInfo.UNMASKED_RENDERER_WEBGL : gl.RENDERER))) ?? 'full';
+  const envSize = quality === 'lite' ? 128 : 256;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 1.02;
@@ -213,7 +230,7 @@ export function createNaviModel(canvas: HTMLCanvasElement) {
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
   const room = new RoomEnvironment();
-  scene.environment = pmrem.fromScene(room, .035).texture;
+  scene.environment = pmrem.fromScene(room, .035, .1, 100, { size: envSize }).texture;
   scene.environmentIntensity = .85;
   room.dispose();
 
@@ -231,7 +248,7 @@ export function createNaviModel(canvas: HTMLCanvasElement) {
   const rim = { value: linear('#f3dccf').multiplyScalar(.35) };
   const EYE_X = .33, EYE_Y = .14, EYE_SINK = -.03, EYE_SCALE = new THREE.Vector3(.152, .198, .09);
   const sockets = [-1, 1].map(side => ({ center: surfacePoint(side * EYE_X, EYE_Y), radius: new THREE.Vector2(EYE_SCALE.x * .93, EYE_SCALE.y * .93) }));
-  const skin = porcelain(rim, sockets), plain = porcelain(rim);
+  const skin = porcelain(rim, sockets, TOQI_RIM), plain = porcelain(rim);
   const ink = new THREE.MeshPhysicalMaterial({ color: INK, roughness: .35, clearcoat: .6, clearcoatRoughness: .3 });
   const disposables: { dispose(): void }[] = [skin, plain, ink, pmrem];
 
@@ -250,6 +267,11 @@ export function createNaviModel(canvas: HTMLCanvasElement) {
   content.add(body);
   disposables.push(bodyGeometry);
 
+  // The toqi, made to measure for the head.
+  const toqi = createToqi({ radiusAt, depth: DEPTH, rim, anisotropy: Math.min(4, renderer.capabilities.getMaxAnisotropy()) });
+  content.add(toqi.mesh);
+  disposables.push(toqi);
+
   const arc = (width: number, height: number, radius: number) => {
     const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(-width / 2, -height / 2, 0), new THREE.Vector3(0, height * 1.5, 0), new THREE.Vector3(width / 2, -height / 2, 0));
     return mergeCaps(new THREE.TubeGeometry(curve, 28, radius, 10, false), new THREE.SphereGeometry(radius, 10, 8), curve);
@@ -257,7 +279,7 @@ export function createNaviModel(canvas: HTMLCanvasElement) {
 
   // Eyes. Each sits in a socket group on the surface; inside a scaled group the ball turns with the gaze (so the iris
   // slides across an oval and the body hides the rest) while the lids stay with the face and blink over it.
-  const studio = eyeStudio(pmrem);
+  const studio = eyeStudio(pmrem, envSize);
   const ballGeometry = new THREE.SphereGeometry(1, 72, 48);
   // Tear film: a thin shell over the front of the ball, fixed to the socket.
   const corneaGeometry = new THREE.SphereGeometry(1.012, 72, 32, 0, Math.PI * 2, 0, 1.4).rotateX(Math.PI / 2);
@@ -404,8 +426,43 @@ export function createNaviModel(canvas: HTMLCanvasElement) {
     shadowMaterial.opacity = .5 * (1 - Math.min(.7, height * 1.2));
   }
 
-  let size = 0, ratio = 0;
+  // Lite drops the clear coat: a second specular layer with its own reflection lookup on every pixel it covers. The
+  // base layer, made a little glossier, keeps the glaze; sheen and every custom shader stay. Each lite material is a
+  // twin of the original, so a switch at run time can link its shaders in the background before the first lite frame.
+  const twins = new Map<THREE.Mesh, [THREE.Material, THREE.Material]>();
+  function prepareLite() {
+    const made = new Map<THREE.Material, THREE.Material>();
+    scene.traverse(object => {
+      if (!(object instanceof THREE.Mesh) || !(object.material instanceof THREE.MeshPhysicalMaterial) || !(object.material.clearcoat > 0) || twins.has(object)) return;
+      const source = object.material;
+      let twin = made.get(source);
+      if (!twin) {
+        const lite = source.clone();
+        lite.onBeforeCompile = source.onBeforeCompile; lite.customProgramCacheKey = source.customProgramCacheKey;
+        lite.roughness += (source.clearcoatRoughness - source.roughness) * source.clearcoat * .5; lite.clearcoat = 0;
+        made.set(source, twin = lite); disposables.push(lite);
+      }
+      twins.set(object, [source, twin]);
+    });
+  }
+  const wear = (lite: boolean) => twins.forEach(([full, twin], mesh) => { mesh.material = lite ? twin : full; });
+  if (quality === 'lite') { prepareLite(); wear(true); }
+
+  let size = 0, ratio = 0, disposed = false;
   return {
+    get quality() { return quality; },
+    /** Links every shader (off the main thread where the browser allows) and uploads the geometry, before Navi shows. */
+    async warm() { await renderer.compileAsync(scene, camera); if (!disposed) renderer.render(scene, camera); },
+    /** Moves a full-quality device that keeps missing frames to lite, without a shader stall. */
+    async lighten() {
+      if (quality === 'lite' || disposed) return;
+      quality = 'lite';
+      prepareLite(); wear(true);
+      const ready = renderer.compileAsync(scene, camera);
+      wear(false);
+      await ready;
+      if (!disposed) wear(true);
+    },
     /** CSS size of the square canvas and the device pixel ratio to draw it at. */
     resize(cssSize: number, pixelRatio: number) {
       if (cssSize === size && pixelRatio === ratio) return;
@@ -415,6 +472,7 @@ export function createNaviModel(canvas: HTMLCanvasElement) {
     setRim(color: string, strength = .35) { rim.value.set(color).multiplyScalar(strength); },
     render(pose: NaviPose) { apply(pose); renderer.render(scene, camera); },
     dispose() {
+      disposed = true;
       disposables.forEach(item => item.dispose());
       scene.environment?.dispose();
       renderer.dispose();

@@ -1,7 +1,7 @@
 import type {MotionPoint} from './motion';
 export type FaceStatus='off'|'loading'|'ready'|'unavailable';
 // One worker/frame in flight. Disposing an epoch rejects both late positions and bitmaps.
-export function createFaceTracker(callbacks:{status:(value:FaceStatus)=>void;face:(point:MotionPoint|null)=>void;paused:()=>boolean;video:()=>HTMLVideoElement|null},environment:{worker:()=>Worker;bitmap:(source:HTMLVideoElement)=>Promise<ImageBitmap>;now:()=>number;timestamp:()=>number}){
+export function createFaceTracker(callbacks:{status:(value:FaceStatus)=>void;face:(point:MotionPoint|null)=>void;paused:()=>boolean;video:()=>HTMLVideoElement|null},environment:{worker:()=>Worker;bitmap:(source:HTMLVideoElement)=>Promise<ImageBitmap>;now:()=>number;timestamp:()=>number;interval?:number}){
  let active=true,ready=false,pending=false,failed=false,lastFace=0;
  callbacks.status('loading');let worker:Worker;
  try{worker=environment.worker();}catch{callbacks.status('unavailable');callbacks.face(null);return {dispose(){active=false;}};}
@@ -28,7 +28,7 @@ export function createFaceTracker(callbacks:{status:(value:FaceStatus)=>void;fac
    if(!active||failed||callbacks.paused()){bitmap.close();pending=false;return;}
    worker.postMessage({type:'frame',bitmap,timestamp:environment.timestamp()},[bitmap]);bitmap=null;
   }catch{bitmap?.close();fail();}
- },125);
+ },environment.interval??125);
  return {dispose(){
   if(!active)return;active=false;clearTimeout(timeout);clearInterval(timer);callbacks.face(null);
   try{worker.postMessage({type:'dispose'});}catch{worker.terminate();}

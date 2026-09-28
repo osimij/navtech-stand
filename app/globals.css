@@ -139,6 +139,8 @@ p { line-height: 1.65; }
 .navi-seat:focus-visible { outline: 2px solid #1a2550; outline-offset: 6px; }
 .navi-seat-hero:hover .mascot-hint,.navi-seat-hero:focus-visible .mascot-hint { opacity: 1; }
 .navi-seat-hero .mascot-hint { bottom: -14px; }
+/* Operator frame-rate readout (?perf=1 on the device, ?perf=0 hides it). */
+.navi-perf { position: fixed; left: 8px; bottom: 8px; z-index: 60; padding: 4px 10px; border-radius: 999px; background: rgb(255 255 255 / .88); color: #3b4250; font: 12px/1.4 var(--font-small); letter-spacing: 0; font-variant-numeric: tabular-nums; pointer-events: none; box-shadow: 0 0 0 1px rgb(22 26 32 / .08); }
 .flow-content { padding: 22px 24px 40px; min-width: 0; }
 .flow-title { font-size: clamp(30px,3.1vw,42px); font-weight: 550; letter-spacing: 0; line-height: 1.2; margin: 28px 0 18px; text-wrap: balance; outline: none; }
 .flow-description { font-size: 16px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 28px; }
@@ -683,9 +685,20 @@ p { line-height: 1.65; }
   conic-gradient(from var(--glow-b), rgb(255 255 255 / 0), var(--glow-5) 18%, rgb(255 255 255 / 0) 38%, var(--glow-6) 62%, rgb(255 255 255 / 0) 82%),
   conic-gradient(from var(--glow-a), var(--glow-1), var(--glow-2) 25%, var(--glow-3) 50%, var(--glow-4) 72%, var(--glow-1));
   animation: glow-a 48s linear infinite, glow-b 72s linear infinite; }
-.ambient-glow::after { inset: var(--glow-inset); border-radius: var(--glow-inset); background: #fff; filter: blur(var(--glow-soft)); }
+/* The white centre's soft edge is a box shadow, not a blur filter: painted once, where a filter is recomputed on every
+   frame the screen redraws (every frame Navi moves). Blur radius and spread are twice the filter's deviation, so the
+   falloff matches; the smaller corner radius grows back to the inset once the spread is added. */
+.ambient-glow::after { inset: calc(var(--glow-inset) + 2 * var(--glow-soft)); border-radius: calc(var(--glow-inset) * .3); background: #fff;
+  box-shadow: 0 0 calc(2 * var(--glow-soft)) calc(2 * var(--glow-soft)) #fff; }
 @keyframes glow-a { to { --glow-a: 360deg; } }
 @keyframes glow-b { to { --glow-b: -180deg; } }
+/* Lite (low-power panels such as the booth's Android screen; lib/navi-quality.ts). The frame's light holds still
+   instead of repainting the whole screen every frame, entrances rise without a blur filter, and sheets dim the page
+   instead of blurring it. */
+html[data-perf=lite] .ambient-glow::before { animation: none; }
+html[data-perf=lite] :is(.intro-step>*,.question-title,.question-option,.focus-step>*,.board-role-step>:not(.role-mark),.prism-step h1,.choice-row) { animation-name: intro-rise-lite; }
+@keyframes intro-rise-lite { from { opacity: 0; transform: translateY(12px); } }
+html[data-perf=lite] .role-sheet-layer { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgb(250 250 252 / .92); }
 /* On a result the frame takes the role's hue, kept soft: analogous tints with one gentle neighbour for depth. */
 .ambient-glow[data-role=data_analyst] { --glow-1: #cde6fb; --glow-2: #d6def9; --glow-3: #c6eaf4; --glow-4: #b9d9f6; --glow-5: rgb(142 200 246 / .75); --glow-6: rgb(190 205 250 / .7); }
 .ambient-glow[data-role=data_scientist] { --glow-1: #cdeedd; --glow-2: #d9f1d2; --glow-3: #c5e8e6; --glow-4: #b7e3cc; --glow-5: rgb(120 212 170 / .7); --glow-6: rgb(180 228 230 / .65); }

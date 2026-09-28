@@ -147,7 +147,9 @@ export default function Home() {
       if (phase === "welcome") { if (chosenLanguage && Date.now() - touched.current > 60000) reset(); return; }
       const limit = phase === "success" ? 20 : 120;
       const left = Math.max(0, limit - Math.floor((Date.now() - touched.current) / 1000));
-      setIdleLeft(left);
+      // The countdown shows only in its last seconds (and on the thank-you), so the page re-renders only then, not
+      // every second of the test on the booth's slow CPU.
+      setIdleLeft(phase === "success" || left <= 15 ? left : limit);
       if (left === 0) reset();
     }, 1000);
     return () => {

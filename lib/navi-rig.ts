@@ -192,7 +192,8 @@ export function createNaviRig(random: () => number = Math.random) {
     },
     /** Advances the simulation by dt seconds and returns the pose to draw. */
     update(dt: number): NaviPose {
-      const step = clamp(dt, 0, 1 / 20);
+      // Up to 10 fps the rig keeps real time (substeps keep it stable), so gestures stay in step with the hops.
+      const step = clamp(dt, 0, 1 / 10);
       time += step;
       if (time >= blinkAt) {
         blink(time);

@@ -6,6 +6,17 @@ export type Fixation = Point & { at: number };
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
+/**
+ * One axis of a critically damped spring, advanced exactly by dt. Numerical integration of a stiff spring rings or
+ * diverges once frames get long (a slow device, a busy start-up), which made Navi jump around its seat; the closed
+ * form stays smooth and never overshoots at any frame rate.
+ */
+export function follow(x: number, v: number, target: number, hz: number, dt: number) {
+  const w = 2 * Math.PI * hz, t = Math.max(0, dt), d = x - target, c = v + w * d, e = Math.exp(-w * t);
+  const next = { x: target + (d + c * t) * e, v: (v - w * c * t) * e };
+  return Number.isFinite(next.x) && Number.isFinite(next.v) ? next : { x: target, v: 0 };
+}
+
 /** Anticipation before a hop: a short crouch while the eyes find the destination. */
 export const TAKEOFF = .16;
 

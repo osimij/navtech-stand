@@ -9,8 +9,9 @@ import type { MotionPoint } from "@/lib/motion";
 import { createShuffleBag } from "@/lib/engagement";
 import { faceCanLead, touchGazeHold } from "@/lib/mascot-gaze";
 import { createNaviRig, GESTURE_POOLS, type NaviGesture, type NaviMood, type NaviRig } from "@/lib/navi-rig";
-import { TAKEOFF, gazeToward, mergeLines, readingFixations, travelDuration, travelPoint, type Box, type Fixation, type Point } from "@/lib/navi-direction";
+import { TAKEOFF, follow, gazeToward, mergeLines, readingFixations, travelDuration, travelPoint, type Box, type Fixation, type Point } from "@/lib/navi-direction";
 import type { NaviModel } from "@/lib/navi-model";
+import { createGovernor, deviceQuality, perfReadout } from "@/lib/navi-quality";
 
 export type NaviCheer = keyof typeof GESTURE_POOLS;
 export type NaviHandle = MascotHandle & {
@@ -34,6 +35,12 @@ const FIELDS = 'input,textarea,select,[role=combobox]';
 const center = (el: Element): Point => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
 const visible = (el: Element) => { const r = el.getBoundingClientRect(); return r.width > 2 && r.height > 2 && r.bottom > 0 && r.top < innerHeight; };
 const resolve = (target: Element | string | null | undefined) => typeof target === 'string' ? document.querySelector(target) : target ?? null;
+// Resolution ceiling as a multiple of the 400px canvas: lite stays near the panel's own pixels instead of above them.
+const MAX_RATIO = { full: 3, lite: 1.75 } as const;
+
+/** Navi is built once the page has its fonts and a quiet moment, so the first screen settles before any 3D work. */
+const settled = () => Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise(done => setTimeout(done, 1500))])
+  .then(() => new Promise<void>(done => 'requestIdleCallback' in window ? requestIdleCallback(() => done(), { timeout: 700 }) : setTimeout(done, 150)));
 
 function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: {
   layer: HTMLDivElement; canvas: HTMLCanvasElement; model: NaviModel; rig: NaviRig; bodyRatio: number; seat: () => Seat | null; onLost: () => void;
@@ -42,16 +49,23 @@ function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: 
   const pick = createShuffleBag<NaviGesture>();
   let reduced = query.matches, dirty = true, mood: NaviMood = 'neutral', active = true, speaking = false;
   let shown: Box | null = null, velocity = { x: 0, y: 0, size: 0 }, opacity = 0, seatId = '', seatHero = false, transform = '';
-  let trip: { from: Box; start: number; dur: number; land: NaviGesture } | null = null;
+  // A hop's own clock (seconds since take-off, negative during the crouch) advances at most 1/15 s a frame, so a
+  // hitch mid-hop slows the arc a touch instead of teleporting Navi along it.
+  let trip: { from: Box; t: number; dur: number; land: NaviGesture } | null = null;
   let queued: NaviCheer | null = null, onArrival: NaviGesture | null = null, greetAt = 0;
   let attention: { fixations: Fixation[]; until: number; el: Element | null } | null = null;
   let hover: Element | null = null, focus: Element | null = null, pointer: (Point & { at: number }) | null = null;
   let face: MotionPoint | null = null, lastInput = 0;
   let glance: { yaw: number; pitch: number; el: Element | null; until: number } | null = null, nextGlance = 4, nextIdle = 12;
-  let clock = performance.now() / 1000, last = performance.now(), frame = 0, rimAt = 0, disposed = false;
+  let clock = performance.now() / 1000, last = performance.now(), frame = 0, rimAt = 0, rimKey = '', disposed = false;
+  // Frame pacing: the governor trims resolution, then halves the character's frame rate, while frames keep missing.
+  const governor = createGovernor();
+  let pace = governor.pace, ticks = 0, shownAt = 0, shownOpacity = '';
+  const readout = perfReadout() ? document.body.appendChild(Object.assign(document.createElement('div'), { className: 'navi-perf' })) : null;
+  let readoutAt = performance.now() + 1000, frames = 0, draws = 0;
 
   const eye = (): Point => shown ? { x: shown.x, y: shown.y - shown.size * .08 } : { x: innerWidth / 2, y: innerHeight / 2 };
-  const settleAt = () => trip ? trip.start + trip.dur + .12 : clock;
+  const settleAt = () => trip ? clock + trip.dur - trip.t + .12 : clock;
 
   function cheer(kind: NaviCheer) {
     if (!active || reduced || mood === 'reassuring') return;
@@ -78,13 +92,14 @@ function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: 
     } else if (current.id !== seatId) {
       // A new seat: crouch, hop along an arc, land. Returning to the welcome seat means a new visitor, so wave.
       const from = { ...shown };
-      trip = reduced ? null : { from, start: clock + TAKEOFF, dur: travelDuration(from, target), land: current.hero && !seatHero ? 'hello' : 'land' };
+      trip = reduced ? null : { from, t: -TAKEOFF, dur: travelDuration(from, target), land: current.hero && !seatHero ? 'hello' : 'land' };
       if (reduced) shown = { ...target }; else rig.play('takeoff');
       seatId = current.id; seatHero = current.hero; attention = null; glance = null; dirty = true;
     } else if (opacity < .02 && !trip) shown = { ...target }; // reappearing after being hidden: no slide
     const before = { ...shown };
     if (trip) {
-      const p = (clock - trip.start) / trip.dur;
+      trip.t += Math.min(dt, 1 / 15);
+      const p = trip.t / trip.dur;
       if (p >= 1) {
         shown = { ...target }; velocity = { x: 0, y: 0, size: 0 };
         rig.play(trip.land);
@@ -94,11 +109,11 @@ function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: 
       } else if (p > 0) shown = travelPoint(trip.from, target, p);
     } else if (reduced) shown = { ...target };
     else {
-      // Between trips Navi stays attached to its seat as the layout breathes (resizes, entering content).
-      const w = 2 * Math.PI * 3.2;
+      // Between trips Navi stays attached to its seat as the layout breathes (resizes, entering content), on an exact
+      // spring that stays smooth however long a frame takes.
       for (const key of ['x', 'y', 'size'] as const) {
-        velocity[key] += (w * w * (target[key] - shown[key]) - 2 * w * velocity[key]) * dt;
-        shown[key] += velocity[key] * dt;
+        const next = follow(shown[key], velocity[key], target[key], 3.2, dt);
+        shown[key] = next.x; velocity[key] = next.v;
       }
     }
     const body = Math.max(20, shown.size * BODY_SHARE);
@@ -138,18 +153,43 @@ function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: 
   function sampleRim() {
     const glow = document.querySelector('.ambient-glow');
     if (!glow) return;
-    const style = getComputedStyle(glow), rgb = style.getPropertyValue('--glow-5').match(/[\d.]+/g);
+    const style = getComputedStyle(glow), colour = style.getPropertyValue('--glow-5'), key = colour + style.opacity;
+    if (key === rimKey) return;
+    const rgb = colour.match(/[\d.]+/g);
     if (!rgb || rgb.length < 3) return;
+    rimKey = key;
     const [r, g, b] = rgb.map(Number), hex = '#' + [r, g, b].map(v => Math.round(Math.min(255, v)).toString(16).padStart(2, '0')).join('');
     model.setRim(hex, .2 + .28 * Number(style.opacity || 1));
     dirty = true;
   }
 
+  function adapt(interval: number) {
+    // Judge the device only once Navi is on screen and past its entrance.
+    if (!shownAt || clock - shownAt < 2.5 || !governor.sample(interval)) return;
+    pace = governor.pace;
+    // A full-quality device that keeps missing frames at reduced resolution takes the lite materials as well.
+    if (pace.level >= 2 && model.quality === 'full') {
+      document.documentElement.dataset.perf = 'lite';
+      void model.lighten();
+    }
+  }
+
+  function report(now: number) {
+    frames++;
+    if (!readout || now < readoutAt) return;
+    const seconds = (now - readoutAt + 1000) / 1000;
+    readout.textContent = `${model.quality} · ${Math.round(frames / seconds)} fps · Navi ${Math.round(draws / seconds)} · ×${pace.scale}${pace.half ? ' · ½' : ''} · ${canvas.width}px`;
+    readoutAt = now + 1000; frames = 0; draws = 0;
+  }
+
   function tick(now: number) {
     frame = requestAnimationFrame(tick);
-    const dt = Math.min(.05, Math.max(0, (now - last) / 1000)); last = now; clock = now / 1000;
+    const interval = now - last;
+    const dt = Math.min(.1, Math.max(0, interval / 1000)); last = now; clock = now / 1000;
+    adapt(interval); report(now);
     const current = seat(), target = current ? measure(current.el) : null;
     place(target, dt);
+    if (shown && !shownAt) shownAt = clock;
     if (queued) { const kind = queued; queued = null; cheer(kind); }
     if (greetAt && clock >= greetAt) { greetAt = 0; if (active && !reduced) rig.play('hello'); }
     if (active && !trip && clock > nextIdle) {
@@ -158,22 +198,30 @@ function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: 
     }
     const gaze = aim();
     rig.setGaze(gaze.yaw, gaze.pitch);
-    if (clock > rimAt) { rimAt = clock + .15; sampleRim(); }
+    if (clock > rimAt) { rimAt = clock + .25; sampleRim(); }
 
     if (shown) {
       const scale = shown.size * BODY_SHARE / (bodyRatio * CANVAS);
       const next = `translate3d(${(shown.x - CANVAS / 2).toFixed(2)}px,${(shown.y - CANVAS / 2).toFixed(2)}px,0) scale(${scale.toFixed(4)})`;
       if (next !== transform) { transform = next; layer.style.transform = next; dirty = true; }
-      layer.style.opacity = opacity.toFixed(3);
+      const alpha = opacity.toFixed(3);
+      if (alpha !== shownOpacity) { shownOpacity = alpha; layer.style.opacity = alpha; }
       // Draw at the resolution Navi is actually shown at, in coarse steps. The large seat beside the questions shows
-      // the canvas at about twice its size, so the buffer may grow to three times the canvas before it is upscaled.
+      // the canvas at about twice its size, so on a capable device the buffer may grow to three times the canvas;
+      // lite stays close to the panel's own pixels, and the governor's scale trims both.
       const scaleOf = (size: number) => size * BODY_SHARE / (bodyRatio * CANVAS);
       const wanted = Math.max(trip ? scaleOf(trip.from.size) : scale, target ? scaleOf(target.size) : scale);
-      model.resize(CANVAS, Math.max(.5, Math.ceil(Math.min(3, wanted * 1.08 * devicePixelRatio) * 8) / 8));
+      model.resize(CANVAS, Math.max(.5, Math.ceil(Math.min(MAX_RATIO[model.quality], wanted * 1.08 * devicePixelRatio) * pace.scale * 8) / 8));
     }
-    if (!reduced) model.render(rig.update(dt));
+    // The rig always advances, so motion keeps its timing; drawing is skipped while Navi is hidden and, at the lowest
+    // pace, on every other frame.
+    const pose = reduced ? null : rig.update(dt);
+    if (opacity <= .001) { dirty = true; return; }
+    if (pace.half && ticks++ % 2) return;
+    if (pose) model.render(pose);
     else if (dirty) model.render(rig.still());
-    dirty = false;
+    else return;
+    dirty = false; draws++;
   }
 
   const onPointerMove = (event: PointerEvent) => { if (event.pointerType === 'touch') return; pointer = { x: event.clientX, y: event.clientY, at: Date.now() }; lastInput = Date.now(); };
@@ -238,7 +286,7 @@ function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: 
     setActive(next: boolean) { active = next; dirty = true; if (!next) { rig.cancel(); hover = null; attention = null; } },
     greet() { lastInput = Date.now(); cheer('greet'); },
     dispose() {
-      disposed = true; cancelAnimationFrame(frame);
+      disposed = true; cancelAnimationFrame(frame); readout?.remove();
       removeEventListener('pointermove', onPointerMove); removeEventListener('pointerdown', onPointerDown); removeEventListener('pointerover', onPointerOver);
       removeEventListener('focusin', onFocusIn); removeEventListener('focusout', onFocusOut); removeEventListener('blur', onLeave);
       document.documentElement.removeEventListener('pointerleave', onLeave);
@@ -261,15 +309,27 @@ export function NaviStage({ ref, mood, active, children }: { ref?: Ref<NaviHandl
   useLayoutEffect(() => { state.current = { mood, active }; director.current?.setMood(mood); director.current?.setActive(active); }, [mood, active]);
   useEffect(() => {
     if (fallback) return;
-    let disposed = false;
-    import('@/lib/navi-model').then(({ createNaviModel, BODY_HEIGHT, VIEW_HEIGHT }) => {
+    let disposed = false, model: NaviModel | null = null;
+    // Load, build and link every shader before Navi appears: a first frame that stalls on shader compilation is what
+    // made the entrance jump on the booth panel.
+    Promise.all([import('@/lib/navi-model'), settled()]).then(async ([{ createNaviModel, BODY_HEIGHT, VIEW_HEIGHT }]) => {
       if (disposed || !layer.current || !canvas.current) return;
-      const model = createNaviModel(canvas.current);
+      model = createNaviModel(canvas.current, { quality: deviceQuality });
+      document.documentElement.dataset.perf = model.quality;
+      await model.warm();
+      if (disposed || !layer.current || !canvas.current) return;
       const next = createDirector({ layer: layer.current, canvas: canvas.current, model, rig: createNaviRig(), bodyRatio: BODY_HEIGHT / VIEW_HEIGHT, seat: () => seats.current.at(-1) ?? null, onLost: () => setFallback(true) });
       next.setMood(state.current.mood); next.setActive(state.current.active);
       director.current = next;
-    }).catch(() => { if (!disposed) setFallback(true); });
-    return () => { disposed = true; director.current?.dispose(); director.current = null; };
+    }).catch(() => {
+      if (!director.current) { model?.dispose(); model = null; }
+      if (!disposed) setFallback(true);
+    });
+    return () => {
+      disposed = true;
+      if (director.current) director.current.dispose(); else model?.dispose();
+      director.current = null; model = null;
+    };
   }, [fallback]);
 
   const register = useCallback((seat: Seat) => {

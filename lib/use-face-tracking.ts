@@ -13,6 +13,8 @@ export function useFaceTracking(enabled:boolean,paused:boolean,video:RefObject<H
    worker:()=>{if(typeof Worker==='undefined'||typeof createImageBitmap==='undefined')throw new Error('unavailable');return new Worker('/mediapipe/face-worker.js',{type:'module'});},
    bitmap:source=>createImageBitmap(source,{resizeWidth:320,resizeHeight:Math.round(source.videoHeight/source.videoWidth*320)}),
    now:()=>Date.now(),timestamp:()=>performance.now(),
+   // Low-power panels look five times a second instead of eight: gaze stays smooth through Navi's springs.
+   interval:document.documentElement.dataset.perf==='lite'?200:125,
   });
   return()=>tracker.dispose();
  },[enabled,video,epoch]);
