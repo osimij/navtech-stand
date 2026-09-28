@@ -239,15 +239,13 @@ export default function Home() {
 
   return <div className={`app-shell visitor-shell career-shell state-${phase} ${phase === "welcome" ? "is-intro" : ""}`}>
     <div className="ambient-glow" data-role={phase === "result" ? shownRole ?? undefined : undefined} aria-hidden="true" />
-    <Header language={language} center={phase === "quiz" ? questionBar : undefined} actions={<>{(phase === "quiz" || phase === "result") && <button type="button" className="question-nav question-end" disabled={busy || advancing} onClick={reset} aria-label={en ? "End test" : "Завершить"}><X size={18} className="question-end-icon" /><span className="question-nav-label">{en ? "End test" : "Завершить"}</span></button>}{phase === "welcome" && chosenLanguage && <button type="button" className="language-switch" onClick={changeLanguage} aria-label={en ? "Change language" : "Сменить язык"}><Globe size={18} />{en ? "EN" : "RU"}</button>}<CameraInvite ref={invitations} game={gameContext} russianOnly narration voiceAllowed={Boolean(chosenLanguage)} controlledLanguage={language} onActivity={() => { touched.current = Date.now(); }} idle={phase === "welcome" && !busy} onGreeting={greet} onMotion={point => mascot.current?.notice(point)} onFace={point => mascot.current?.trackFace(point)} onSpeech={frame => mascot.current?.speak(frame)} onOpenChange={setSettingsOpen} /></>} />
+    <Header language={language} center={phase === "quiz" ? questionBar : undefined} actions={<>{(phase === "quiz" || phase === "result" || phase === "contact") && <button type="button" className="question-nav question-end" disabled={busy || advancing} onClick={reset} aria-label={en ? "End test" : "Завершить"}><X size={18} className="question-end-icon" /><span className="question-nav-label">{en ? "End test" : "Завершить"}</span></button>}{phase === "welcome" && chosenLanguage && <button type="button" className="language-switch" onClick={changeLanguage} aria-label={en ? "Change language" : "Сменить язык"}><Globe size={18} />{en ? "EN" : "RU"}</button>}<CameraInvite ref={invitations} game={gameContext} russianOnly narration voiceAllowed={Boolean(chosenLanguage)} controlledLanguage={language} onActivity={() => { touched.current = Date.now(); }} idle={phase === "welcome" && !busy} onGreeting={greet} onMotion={point => mascot.current?.notice(point)} onFace={point => mascot.current?.trackFace(point)} onSpeech={frame => mascot.current?.speak(frame)} onOpenChange={setSettingsOpen} /></>} />
     <main className={`booth-grid phase-${phase}`}>
       <section className="play-panel" aria-label={en?"Explore with Navi":"Игра с Нави"}>
-        {(phase === "contact" || phase === "success") && <div className="panel-top">
-          <div className="panel-companion"><Mascot label={en?"Hear a hint from Navi":"Подсказка Нави"} hint={en?"Tap for a hint":"Нажмите для подсказки"} ref={mascot} compact mood={mascotMood} active={!settingsOpen} onGreet={() => {if(chosenLanguage)invitations.current?.invite();}} /><span className="panel-product">{en?"Navi":"Нави"} <span>· NavTech</span></span></div>
-          <Button variant="ghost" className="reset-button" disabled={busy || advancing} onClick={reset}>{en?'End test':'Завершить'}</Button>
+        {(phase === "contact" || phase === "success") && <div className="result-navi">
+          <Mascot label={en?"Hear a hint from Navi":"Подсказка Нави"} hint={en?"Tap for a hint":"Нажмите для подсказки"} ref={mascot} compact mood={mascotMood} active={!settingsOpen} onGreet={() => {if(chosenLanguage)invitations.current?.invite();}} />
+          <p className="navi-caption" aria-live="polite">{greeting}</p>
         </div>}
-
-        {(phase === "contact" || phase === "success") && greeting && <p className="game-caption voice-caption-subordinate" aria-live="polite">{greeting}</p>}
 
         {phase === "welcome" && <div className={`intro ${advancing && !chosenLanguage ? "is-leaving" : ""}`}>
           <div className="intro-navi"><Mascot label={chosenLanguage ? (en ? "Hear a hint from Navi" : "Подсказка Нави") : "Нави · Navi"} hint={chosenLanguage ? (en ? "Tap for a hint" : "Нажмите для подсказки") : ""} ref={mascot} mood={mascotMood} active={!settingsOpen && !busy} onGreet={() => {if(chosenLanguage)invitations.current?.invite();}} /></div>
@@ -294,31 +292,35 @@ export default function Home() {
           {(saveState==='error'||saveError)&&<div className="result-save-notice" role="status"><span>{en?'Your result is ready. The booth statistics have not been updated yet.':'Результат готов. Пока не удалось добавить его в аналитику стенда.'}</span><Button variant="ghost" onClick={()=>void persistResult(answers)} disabled={saveState==='saving'}>{en?'Retry saving':'Повторить сохранение'}</Button></div>}
         </div>}
 
-        {phase === "contact" && <form className="flow-content contact-form" onSubmit={save}>
+        {/* The closing steps share the result's card: a round control at the corner inset, capsule fields and one
+            capsule action along the bottom edge. */}
+        {phase === "contact" && <form className="flow-card contact-card" onSubmit={save}>
+          <div className="sheet-bar"><button type="button" className="sheet-corner" disabled={busy} onClick={() => setPhase("result")} aria-label={en?"Back to results":"К результату"}><ArrowLeft size={20} /></button></div>
           <h1 ref={title} tabIndex={-1} className="flow-title">{en ? "Meet the NavTech team." : "Обсудим вашу задачу."}</h1>
           <p className="flow-description">{en ? "Leave a contact to discuss HR Agent and Prism." : "Оставьте контакт для разговора о HR Agent и Prism."}</p>
           <div className="contact-fields">
             <label className="form-field">{en?"Your name":"Ваше имя"}<Input autoComplete="off" maxLength={80} minLength={2} required value={name} onChange={e => setName(e.target.value)} placeholder={en?"What should we call you?":"Как к вам обращаться"} /></label>
             <label className="form-field">{en?"Phone, email or Telegram":"Телефон, почта или Telegram"}<Input autoComplete="off" required maxLength={150} value={contact} onChange={e => setContact(e.target.value)} placeholder="+992 … / name@company.tj / @username" /></label>
+            <div className="form-field"><span id="contact-topic-label">{en?"Topic":"Тема разговора"}</span><Select value={interest} onValueChange={setInterest} required><SelectTrigger aria-labelledby="contact-topic-label"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(interestLabels).filter(([id])=>id!=="career").map(([id,label]) => <SelectItem key={id} value={id}>{en?({hr:"HR Agent",prism:"Prism",both:"Both products",career:"Career at NavTech"}[id]||label):label}</SelectItem>)}</SelectContent></Select></div>
+            <details className="company-details"><summary>{en?"Add company":"Добавить компанию"}<ChevronDown size={15} /></summary><label className="form-field"><span className="visually-hidden">{en?"Company":"Компания"}</span><Input autoComplete="off" maxLength={120} value={company} onChange={e => setCompany(e.target.value)} placeholder={en?"Company name":"Название компании"} /></label></details>
           </div>
-          <details className="company-details"><summary>{en?"Add company":"Добавить компанию"}<ChevronDown size={15} /></summary><label className="form-field"><span className="visually-hidden">{en?"Company":"Компания"}</span><Input autoComplete="off" maxLength={120} value={company} onChange={e => setCompany(e.target.value)} placeholder={en?"Company name":"Название компании"} /></label></details>
-          <div className="contact-topic"><span>{en?"Topic":"Тема разговора"}</span><Select value={interest} onValueChange={setInterest} required><SelectTrigger aria-label={en?"Topic":"Тема разговора"}><SelectValue /></SelectTrigger><SelectContent>{Object.entries(interestLabels).filter(([id])=>id!=="career").map(([id,label]) => <SelectItem key={id} value={id}>{en?({hr:"HR Agent",prism:"Prism",both:"Both products",career:"Career at NavTech"}[id]||label):label}</SelectItem>)}</SelectContent></Select></div>
           <label className="consent-label"><Checkbox checked={consent} onCheckedChange={value => setConsent(value === true)} aria-label={en?"Consent to contact from NavTech":"Согласие на связь с NavTech"} /><span>{en?"I agree to share my name, contact, company and result with NavTech for follow-up on this topic. Withdraw consent: ":"Согласен передать NavTech имя, контакт, компанию и результат для связи по выбранной теме. Отозвать согласие: "}<a href="mailto:info@navtech.tj">info@navtech.tj</a>.</span></label>
-          <div className="result-actions"><Button type="submit" className="primary-button" disabled={!consent || !interest || busy}>{busy ? (en?"Saving…":"Сохраняем…") : (en?"Request a conversation":"Договориться о разговоре")}<ArrowRight /></Button><Button type="button" variant="ghost" className="skip-button" disabled={busy} onClick={() => setPhase("result")}>{en?"Back to results":"К результату"}</Button></div>
+          {error && <p className="flow-error" role="alert">{error}</p>}
+          <Button type="submit" className="primary-button flow-action" disabled={!consent || !interest || busy}>{busy ? (en?"Saving…":"Сохраняем…") : (en?"Request a conversation":"Договориться о разговоре")}<ArrowRight /></Button>
         </form>}
 
-        {phase === "success" && <div className="flow-content success-content">
+        {phase === "success" && <div className="flow-card success-card">
           <div className="success-icon"><Check /></div>
           <h1 ref={title} tabIndex={-1} className="flow-title">{en?"Thank you for joining us.":"Спасибо за знакомство."}</h1>
-          <p>{en?"Your request is saved. The team will contact you.":"Запрос сохранён. Команда свяжется с вами."}</p>
-          <Button className="primary-button" onClick={reset}>{en?"Next visitor":"Следующий участник"}<ArrowRight /></Button>
+          <p className="flow-description">{en?"Your request is saved. The team will contact you.":"Запрос сохранён. Команда свяжется с вами."}</p>
           <span className="fine-print">{en?`New test in ${idleLeft}s`:`Новая игра через ${idleLeft} сек.`}</span>
+          <Button className="primary-button flow-action" onClick={reset}>{en?"Next visitor":"Следующий участник"}<ArrowRight /></Button>
         </div>}
 
-        {error && phase !== "welcome" && <div className="form-error" role="alert"><p>{error}</p></div>}
+        {error && phase !== "welcome" && phase !== "contact" && <div className="form-error" role="alert"><p>{error}</p></div>}
         {phase !== "welcome" && phase !== "success" && idleLeft <= 15 && <div className="timeout-notice" role="alert">{en?`New test in ${idleLeft}s`:`Новая игра через ${idleLeft} сек.`}<Button variant="outline" onClick={() => { touched.current = Date.now(); setIdleLeft(120); }}>{en?"I’m still here":"Я ещё здесь"}</Button></div>}
       </section>
     </main>
-    {(phase !== "welcome" || chosenLanguage) && phase !== "quiz" && <nav className="prism-ribbon" aria-label="Prism"><Link href="/screen" target="_blank" rel="noreferrer"><strong>Prism</strong> — {en ? "see the shared picture" : "посмотреть общую картину"}</Link>{phase === "result" && <button type="button" onClick={() => { setInterest("both"); setPhase("contact"); }}>{en ? "Talk to the NavTech team" : "Обсудить продукты NavTech"}</button>}</nav>}
+    {(phase === "result" || (phase === "welcome" && chosenLanguage)) && <nav className="prism-ribbon" aria-label="Prism"><Link href="/screen" target="_blank" rel="noreferrer"><strong>Prism</strong> — {en ? "see the shared picture" : "посмотреть общую картину"}</Link>{phase === "result" && <button type="button" onClick={() => { setInterest("both"); setPhase("contact"); }}>{en ? "Talk to the NavTech team" : "Обсудить продукты NavTech"}</button>}</nav>}
   </div>;
 }
