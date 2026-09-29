@@ -8,6 +8,7 @@ import {RoleRanking,roleName} from './role-ranking';
 import {Sheet} from './sheet';
 import {Header} from './shell';
 import {profiles,questions,QUIZ_VERSION,type Stats,type QuizLanguage} from '@/lib/quiz';
+import {requestSignal} from '@/lib/request-signal';
 const empty:Stats={started:0,completed:0,leads:0,profiles:[],intents:[],interests:[],hours:[],patterns:[],legacy:{started:0,completed:0},excluded:0,version:QUIZ_VERSION,updatedAt:''};
 type View='roles'|'choices';
 
@@ -21,7 +22,7 @@ export default function Analytics({language:givenLanguage,onLanguageChange,russi
  const language=givenLanguage||localLanguage,en=language==='en';
  useEffect(()=>{
   let active=true,pending=false;const controller=new AbortController();
-  async function update(){if(pending||document.hidden)return;pending=true;try{const response=await fetch('/api/stats',{cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(12000)])});if(!response.ok)throw Error();const data=await response.json() as Stats;if(active){setStats(data);setLoaded(true);setError(false);}}catch(e){if(active&&(e as Error).name!=='AbortError')setError(true);}finally{pending=false;}}
+  async function update(){if(pending||document.hidden)return;pending=true;try{const response=await fetch('/api/stats',{cache:'no-store',signal:requestSignal(12000,controller.signal)});if(!response.ok)throw Error();const data=await response.json() as Stats;if(active){setStats(data);setLoaded(true);setError(false);}}catch(e){if(active&&(e as Error).name!=='AbortError')setError(true);}finally{pending=false;}}
   void update();const interval=setInterval(update,5000);document.addEventListener('visibilitychange',update);
   return()=>{active=false;controller.abort();clearInterval(interval);document.removeEventListener('visibilitychange',update);};
  },[refresh]);

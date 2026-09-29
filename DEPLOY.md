@@ -46,7 +46,8 @@ To check the voice at any time, the first line of a run reports `cached` or `gen
 
 The booth's 32" Android touch panel opens the hosted site in Chrome. It picks the lite rendering tier on its own (MASCOT.md,
 «smooth on the booth's low-power panel»). To check it on the panel, open the site once with `?perf=1`: a small readout in
-the lower-left corner shows the tier, frames per second, how often Navi is drawn and its resolution. `?perf=0` hides it
+the lower-left corner shows the tier, frames per second, how often Navi is drawn, its resolution, the page size in CSS
+pixels with the display scale, and the Chrome version. `?perf=0` hides it
 again. `?navi=lite`, `?navi=full` and `?navi=auto` (the default) override the tier on that device only; the choice is
 remembered in its browser.
 

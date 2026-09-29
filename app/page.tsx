@@ -10,6 +10,7 @@ import { questions, scoreAnswers, interestLabels, type QuizLanguage } from "@/li
 import CameraInvite, { type CameraHandle } from "./camera";
 import { NaviSeat, NaviStage, type NaviHandle } from "./navi";
 import { createSessionSync, type SaveState } from "@/lib/session-sync";
+import { requestSignal } from "@/lib/request-signal";
 import { taskPreviews, englishTaskPreviews } from "@/lib/work-context";
 import { matchSpokenAnswer } from "@/lib/voice-answer-match";
 import { useVoiceAnswers, useVoiceAnswersSetting } from "@/lib/use-voice-answers";
@@ -33,7 +34,7 @@ async function api(path: string, method: string, payload: unknown, signal?: Abor
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(12000)]) : AbortSignal.timeout(12000),
+      signal: requestSignal(12000, signal),
     });
   } catch {
     throw Error("Нет соединения. Попробуйте ещё раз — ваши ответы остались на экране.");
@@ -485,7 +486,7 @@ export default function Home() {
               <button type="button" className="offer-action" onClick={openRequest} data-navi-look>{en ? "Leave a request" : "Оставить заявку"}<ArrowRight size={16} /></button>
             </div>
           </div>
-          {(saveState==='error'||saveError)&&<div className="result-save-notice" role="status"><span>{en?'Your result is ready. The booth statistics have not been updated yet.':'Результат готов. Пока не удалось добавить его в аналитику стенда.'}</span><Button variant="ghost" onClick={()=>void persistResult(answers)} disabled={saveState==='saving'}>{en?'Retry saving':'Повторить сохранение'}</Button></div>}
+          {(saveState==='error'||saveError)&&<div className="result-save-notice" role="status"><span>{en?'Your result is ready. The booth statistics have not been updated yet.':'Результат готов. Пока не удалось добавить его в аналитику стенда.'}</span><Button variant="ghost" onClick={()=>void persistResult(answers)} disabled={saveState==='saving'}>{en?'Retry':'Повторить'}</Button></div>}
         </div>}
 
         {error && phase !== "welcome" && phase !== "contact" && <div className="form-error" role="alert"><p>{error}</p></div>}

@@ -63,6 +63,8 @@ function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: 
   let pace = governor.pace, ticks = 0, shownAt = 0, shownOpacity = '';
   const readout = perfReadout() ? document.body.appendChild(Object.assign(document.createElement('div'), { className: 'navi-perf' })) : null;
   let readoutAt = performance.now() + 1000, frames = 0, draws = 0;
+  // The page size and browser version the layout and requests actually meet on this device.
+  const browser = navigator.userAgent.match(/Chrome\/(\d+)/)?.[1];
 
   const eye = (): Point => shown ? { x: shown.x, y: shown.y - shown.size * .08 } : { x: innerWidth / 2, y: innerHeight / 2 };
   const settleAt = () => trip ? clock + trip.dur - trip.t + .12 : clock;
@@ -178,7 +180,7 @@ function createDirector({ layer, canvas, model, rig, bodyRatio, seat, onLost }: 
     frames++;
     if (!readout || now < readoutAt) return;
     const seconds = (now - readoutAt + 1000) / 1000;
-    readout.textContent = `${model.quality} · ${Math.round(frames / seconds)} fps · Navi ${Math.round(draws / seconds)} · ×${pace.scale}${pace.half ? ' · ½' : ''} · ${canvas.width}px`;
+    readout.textContent = `${model.quality} · ${Math.round(frames / seconds)} fps · Navi ${Math.round(draws / seconds)} · ×${pace.scale}${pace.half ? ' · ½' : ''} · ${canvas.width}px · ${innerWidth}×${innerHeight} @${devicePixelRatio}${browser ? ` · Chrome ${browser}` : ''}`;
     readoutAt = now + 1000; frames = 0; draws = 0;
   }
 

@@ -633,8 +633,8 @@ p { line-height: 1.65; }
 .success-step .fine-print { margin-top: 14px; font-size: 12px; font-family: var(--font-small); color: #7a818b; }
 
 /* On the result Navi asks one question from its corner: one row beside it, the question and its answer, clear of the
-   board above. The Prism line moves to the right to make room. Where the row has no room, the same action joins the
-   bottom line instead. */
+   board above. The Prism line moves to the right to make room. Below 960px, where Navi's seat steps aside, the same
+   action joins the bottom line instead. */
 .navi-offer { position: absolute; left: calc(100% + 12px); top: 50%; width: max-content; max-width: min(640px,calc(100vw - 560px)); display: flex; align-items: center; gap: 16px; padding: 6px 6px 6px 20px;
   border-radius: 28px 28px 28px 8px; background: #fff; box-shadow: 0 0 0 1px rgb(22 26 32 / .06), 0 18px 40px -22px rgb(40 48 70 / .45); transform: translateY(-50%); animation: offer-in .7s cubic-bezier(.16,1,.3,1) 1.6s both; }
 .navi-offer p { margin: 0; color: #15171a; font-size: 16px; line-height: 1.35; text-wrap: balance; }
@@ -642,11 +642,14 @@ p { line-height: 1.65; }
 .offer-action:hover { background: #343434; }
 @keyframes offer-in { from { opacity: 0; transform: translate(-8px,-50%) scale(.96); } }
 .prism-ribbon>.ribbon-request { display: none; }
-@media(min-width:1180px) {
-  .state-result .prism-ribbon { justify-content: flex-end; padding-right: max(36px,calc((100vw - 1360px) / 2)); }
+/* The bottom line on the result is Navi's band, as tall as its corner seat, so the board always ends above Navi and
+   its question, whatever the screen's height. The Prism line and any notice sit on the band's right, level with Navi. */
+@media(min-width:960px) {
+  .state-result .prism-ribbon { min-height: calc(var(--navi-seat) + var(--navi-bottom) + 8px); padding: 8px var(--navi-left) var(--navi-bottom); justify-content: flex-end; }
   .career-shell:has(.result-save-notice) .prism-ribbon>a { visibility: hidden; }
+  .state-result .timeout-notice { left: auto; right: var(--navi-left); bottom: calc(var(--navi-bottom) + var(--navi-seat) / 2); transform: translateY(50%); }
 }
-@media(max-width:1179px) { .navi-offer { display: none; } .prism-ribbon>.ribbon-request { display: inline-flex; } }
+@media(max-width:959px) { .prism-ribbon>.ribbon-request { display: inline-flex; } }
 
 @media(max-width:959px) {
   .career-shell .booth-grid.phase-quiz,.career-shell .booth-grid.phase-contact,.career-shell .booth-grid.phase-success { width: min(calc(100% - 32px),720px); }
@@ -715,8 +718,10 @@ html[data-perf=lite] .role-sheet-layer { -webkit-backdrop-filter: none; backdrop
 .booth-grid.phase-result { display: flex; }
 .phase-result .play-panel { display: flex; flex-direction: column; }
 .state-result .event-tag { display: none; }
-/* The board keeps clear of Navi in the lower-left corner. */
-.career-shell.state-result .booth-grid { --navi-room: calc(max(36px,(100vw - 1360px) / 2) + clamp(72px,10vh,104px) + 24px); width: min(1180px,calc(100% - 2 * var(--navi-room))); }
+/* Navi's corner seat: its size and inset, shared by the seat, the bottom band that keeps the board clear of it and the
+   notices level with it. */
+.career-shell.state-result { --navi-left: max(36px,calc((100vw - 1360px) / 2)); --navi-seat: clamp(64px,10vh,104px); --navi-bottom: clamp(12px,2.4vh,28px); }
+.career-shell.state-result .booth-grid { width: min(1180px,calc(100% - 2 * var(--navi-left))); }
 .result-content { flex: 1; display: flex; flex-direction: column; }
 .result-board,.prism-board { --btn: clamp(54px,7.2vh,64px); --pane-pad: clamp(12px,1.7vh,16px); --board-gap: clamp(8px,1.2vh,12px); --rank-inset: clamp(4px,.8vw,10px);
   --pane-r: calc(var(--btn) / 2 + var(--pane-pad)); --board-r: calc(var(--pane-r) + var(--board-gap));
@@ -725,6 +730,15 @@ html[data-perf=lite] .role-sheet-layer { -webkit-backdrop-filter: none; backdrop
   box-shadow: 0 0 0 1px rgb(22 26 32 / .06), 0 2px 6px -2px rgb(22 26 32 / .06), 0 64px 120px -64px rgb(30 40 60 / .42);
   animation: board-in .8s cubic-bezier(.16,1,.3,1) both; }
 @keyframes board-in { from { opacity: 0; transform: translateY(24px) scale(.985); } }
+/* Short landscape screens (a 1080p panel at 1.5–2× scale): the header and the board's top margin give up a little
+   height so the whole board still fits above Navi's band. */
+@media(max-height:680px) and (min-width:960px) { .state-result .masthead { min-height: 64px; } .career-shell.state-result .booth-grid { margin-top: 0; } .result-board { padding-bottom: 0; } }
+@media(max-height:600px) and (min-width:960px) {
+  .career-shell.state-result { --navi-seat: clamp(56px,10vh,104px); }
+  .result-board .board-ranking { padding-top: 12px; }
+  .result-board .board-head p { display: none; }
+  .result-board .rank-row { min-height: 38px; }
+}
 
 /* Ranking: a title set at the card's corner radius, then one capsule row per role. */
 .board-ranking { display: flex; flex-direction: column; min-width: 0; padding: clamp(18px,3.4vh,36px) var(--rank-inset) clamp(12px,1.8vh,20px); }
@@ -734,13 +748,13 @@ html[data-perf=lite] .role-sheet-layer { -webkit-backdrop-filter: none; backdrop
 .rank-list { position: relative; display: grid; }
 .rank-thumb { position: absolute; top: 0; left: 0; right: 0; border-radius: calc(var(--board-r) - var(--board-gap) - var(--rank-inset)); background: var(--role-soft); pointer-events: none; }
 .rank-list[data-ready] .rank-thumb { transition: transform .5s cubic-bezier(.3,1.15,.4,1), height .5s ease, background-color .5s ease; }
-.rank-row { position: relative; display: grid; grid-template-columns: 1.5em auto minmax(0,1fr); align-items: center; gap: clamp(10px,1.2vw,16px); width: 100%; min-height: clamp(48px,6.6vh,68px);
-  padding: clamp(6px,1vh,10px) clamp(18px,2vw,28px) clamp(6px,1vh,10px) clamp(10px,1.2vw,16px); border: 0; border-radius: calc(var(--board-r) - var(--board-gap) - var(--rank-inset));
+.rank-row { position: relative; display: grid; grid-template-columns: 1.5em auto minmax(0,1fr); align-items: center; gap: clamp(10px,1.2vw,16px); width: 100%; min-height: clamp(40px,6.6vh,68px);
+  padding: clamp(4px,.8vh,10px) clamp(18px,2vw,28px) clamp(4px,.8vh,10px) clamp(10px,1.2vw,16px); border: 0; border-radius: calc(var(--board-r) - var(--board-gap) - var(--rank-inset));
   background: none; color: #6a717b; font: inherit; text-align: left; transition: color .2s; }
 .rank-row:hover { color: #15171a; }
 .rank-row[data-close],.rank-row[aria-pressed=true] { color: #15171a; }
 .rank-place { color: #8a919b; font-size: clamp(14px,1.7vh,16px); text-align: center; font-variant-numeric: tabular-nums; }
-.rank-row .career-icon { width: clamp(34px,4.6vh,42px); height: clamp(34px,4.6vh,42px); border-radius: 50%; background: rgb(22 26 32 / .045); color: #7d848e; transition: background-color .35s, color .35s; }
+.rank-row .career-icon { width: clamp(30px,4.6vh,42px); height: clamp(30px,4.6vh,42px); border-radius: 50%; background: rgb(22 26 32 / .045); color: #7d848e; transition: background-color .35s, color .35s; }
 .rank-row[data-close] .career-icon { background: var(--role-soft); color: var(--role-ink); }
 .rank-row[aria-pressed=true] .career-icon { background: #fff; color: var(--role-ink); }
 .rank-body { display: grid; gap: clamp(5px,.8vh,8px); min-width: 0; }
@@ -798,11 +812,13 @@ html[data-perf=lite] .role-sheet-layer { -webkit-backdrop-filter: none; backdrop
 .prism-ribbon>button:hover { color: #171717; }
 /* Navi keeps company from the corner. Its voice caption sits beside it and stops short of the centred bottom line;
    where there is no room for both, the caption steps aside (the voice itself continues). */
-.result-navi { position: fixed; left: max(36px,calc((100vw - 1360px) / 2)); bottom: clamp(14px,2.4vh,28px); z-index: 3; width: clamp(72px,10vh,104px); height: clamp(72px,10vh,104px); }
+.result-navi { position: fixed; left: var(--navi-left); bottom: var(--navi-bottom); z-index: 3; width: var(--navi-seat); height: var(--navi-seat); }
 .result-navi .mascot { width: 100%; height: 100%; }
 .result-navi .navi-caption { max-width: min(300px,calc(50vw - 420px)); }
 @media(max-width:1179px) { .result-navi .navi-caption { display: none; } }
-.result-save-notice { position: fixed; right: max(36px,calc((100vw - 1360px) / 2)); bottom: clamp(14px,2.4vh,28px); z-index: 3; max-width: 360px; margin: 0; padding: 8px 8px 8px 16px; border-radius: 18px; background: #fffaf0; box-shadow: inset 0 0 0 1px #eadfc6; }
+.result-save-notice { position: fixed; right: var(--navi-left); bottom: calc(var(--navi-bottom) + var(--navi-seat) / 2); z-index: 3; flex-wrap: nowrap; max-width: 360px; margin: 0; padding: 8px 8px 8px 16px; border-radius: 18px; background: #fffaf0; box-shadow: inset 0 0 0 1px #eadfc6; transform: translateY(50%); }
+.result-save-notice>span { flex: 1 1 auto; min-width: 0; }
+.result-save-notice>button { flex: none; }
 .timeout-notice { position: fixed; left: 50%; bottom: 24px; z-index: 60; width: max-content; max-width: calc(100% - 32px); margin: 0; transform: translateX(-50%); box-shadow: 0 18px 40px -24px rgb(40 48 70 / .45); }
 @media(max-width:959px) {
   .career-shell.state-result .booth-grid { width: min(calc(100% - 32px),640px); }
